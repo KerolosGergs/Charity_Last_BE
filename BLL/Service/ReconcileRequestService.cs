@@ -54,5 +54,10 @@ namespace BLL.Service
             await _repository.DeleteAsync(entity);
             return true;
         }
+        public async Task<int> GetAllRequestsCount()
+        {
+            return await _repository.CountAsync();
+
+        }
     }
-} 
+}

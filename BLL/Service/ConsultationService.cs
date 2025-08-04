@@ -64,7 +64,7 @@ namespace BLL.Service
             {
                 dto.AdvisorCount = await _consultationRepository.GetAdvisorCountAsync(dto.Id);
                 dto.RequestCount = await _consultationRepository.GetRequestCountAsync(dto.Id);
-                dto.LectureCount = await _consultationRepository.GetLectureCountAsync(dto.Id);
+                //dto.LectureCount = await _consultationRepository.GetLectureCountAsync(dto.Id);
             }
 
             return consultationDtos;
@@ -79,7 +79,7 @@ namespace BLL.Service
             var dto = _mapper.Map<ConsultationDTO>(consultation);
             dto.AdvisorCount = await _consultationRepository.GetAdvisorCountAsync(id);
             dto.RequestCount = await _consultationRepository.GetRequestCountAsync(id);
-            dto.LectureCount = await _consultationRepository.GetLectureCountAsync(id);
+            //dto.LectureCount = await _consultationRepository.GetLectureCountAsync(id);
 
             return dto;
         }
@@ -104,8 +104,8 @@ namespace BLL.Service
                 Message = $"تم تقديم طلب استشارة جديدة بعنوان: {consultation.ConsultationName}",
                 Type = NotificationType.Consultation
             };
-            await _notificationService.AddNotificationAsync(notification);
-            await _emailService.SendEmailAsync(adminEmail, notification.Title, notification.Message);
+            //await _notificationService.AddNotificationAsync(notification);
+            //await _emailService.SendEmailAsync(adminEmail, notification.Title, notification.Message);
 
             return _mapper.Map<ConsultationDTO>(createdConsultation);
         }
@@ -145,7 +145,7 @@ namespace BLL.Service
             if (consultation == null)
                 return false;
 
-            await _consultationRepository.DeleteAsync(consultation);
+            await _consultationRepository.DeleteAsync(consultation.Id);
             return true;
         }
 
@@ -228,7 +228,7 @@ namespace BLL.Service
             var dto = _mapper.Map<ConsultationDTO>(consultation);
             dto.AdvisorCount = await _consultationRepository.GetAdvisorCountAsync(id);
             dto.RequestCount = await _consultationRepository.GetRequestCountAsync(id);
-            dto.LectureCount = await _consultationRepository.GetLectureCountAsync(id);
+            //dto.LectureCount = await _consultationRepository.GetLectureCountAsync(id);
 
             return dto;
         }
@@ -243,7 +243,7 @@ namespace BLL.Service
             {
                 dto.AdvisorCount = await _consultationRepository.GetAdvisorCountAsync(dto.Id);
                 dto.RequestCount = await _consultationRepository.GetRequestCountAsync(dto.Id);
-                dto.LectureCount = await _consultationRepository.GetLectureCountAsync(dto.Id);
+                //dto.LectureCount = await _consultationRepository.GetLectureCountAsync(dto.Id);
             }
 
             return consultationDtos;

@@ -29,7 +29,7 @@ namespace BLL.Service
             _mapper = mapper;
             _environment = environment;
             _uploadPath = Path.Combine(_environment.WebRootPath, "uploads", "lectures");
-            
+
             // Create upload directory if it doesn't exist
             if (!Directory.Exists(_uploadPath))
             {
@@ -39,7 +39,7 @@ namespace BLL.Service
 
         public async Task<List<LectureDTO>> GetAllLecturesAsync()
         {
-            var lectures = await _lectureRepository.GetAllWithRelatedDataAsync();
+            var lectures = await _lectureRepository.GetAllAsync();
             return _mapper.Map<List<LectureDTO>>(lectures);
         }
 
@@ -51,21 +51,21 @@ namespace BLL.Service
 
         public async Task<LectureDTO> GetLectureByIdAsync(int id)
         {
-            var lecture = await _lectureRepository.GetByIdWithRelatedData(id);
+            var lecture = await _lectureRepository.GetByIdAsync(id);
             return _mapper.Map<LectureDTO>(lecture);
         }
 
-        public async Task<LectureDTO> CreateLectureAsync(string adminId, CreateLectureDTO createLectureDto)
+        public async Task<LectureDTO> CreateLectureAsync( CreateLectureDTO createLectureDto)
         {
             var lecture = _mapper.Map<Lecture>(createLectureDto);
-            lecture.CreatedBy = adminId;
+            //lecture.CreatedBy = adminId;
             lecture.CreatedAt = DateTime.UtcNow;
 
             if (lecture.IsPublished)
                 lecture.PublishedAt = DateTime.UtcNow;
 
-            if (createLectureDto.Tags != null)
-                lecture.Tags = System.Text.Json.JsonSerializer.Serialize(createLectureDto.Tags);
+            //if (createLectureDto.Tags != null)
+            //    lecture.Tags = System.Text.Json.JsonSerializer.Serialize(createLectureDto.Tags);
 
             var createdLecture = await _lectureRepository.AddAsync(lecture);
             return _mapper.Map<LectureDTO>(createdLecture);
@@ -73,24 +73,32 @@ namespace BLL.Service
 
         public async Task<LectureDTO> UploadVideoAsync(string adminId, LectureUploadDTO uploadDto)
         {
+            // This would typically handle file upload logic
             var lecture = new Lecture
             {
                 Title = uploadDto.Title,
                 Description = uploadDto.Description,
-                Speaker = uploadDto.Speaker,
-                Type = uploadDto.Type,
-                ConsultationId = uploadDto.ConsultationId,
-                CreatedBy = adminId,
+                //Type = uploadDto.Type,
+                //ConsultationId = uploadDto.ConsultationId,
+                //CreatedBy = adminId,
                 CreatedAt = DateTime.UtcNow,
-                VideoUrl = uploadDto.VideoUrl,
-                Tags = uploadDto.Tags != null ? System.Text.Json.JsonSerializer.Serialize(uploadDto.Tags) : null
+                //Tags = uploadDto.Tags != null ? System.Text.Json.JsonSerializer.Serialize(uploadDto.Tags) : null
             };
 
             var createdLecture = await _lectureRepository.AddAsync(lecture);
             return _mapper.Map<LectureDTO>(createdLecture);
         }
 
-        // تم حذف دالة UploadVideoAsync ودالة ValidateVideoFileAsync وكل ما يتعلق برفع ملف الفيديو
+        public async Task<bool> ValidateVideoFileAsync(IFormFile videoFile)
+        {
+            if (videoFile == null || videoFile.Length == 0)
+                return false;
+
+            var allowedExtensions = new[] { ".mp4", ".avi", ".mov", ".wmv", ".flv" };
+            var extension = Path.GetExtension(videoFile.FileName).ToLowerInvariant();
+
+            return allowedExtensions.Contains(extension) && videoFile.Length <= 500 * 1024 * 1024; // 500MB max
+        }
 
         public async Task<LectureDTO> UpdateLectureAsync(int id, UpdateLectureDTO updateLectureDto)
         {
@@ -105,23 +113,20 @@ namespace BLL.Service
             if (!string.IsNullOrEmpty(updateLectureDto.Description))
                 lecture.Description = updateLectureDto.Description;
 
-            if (!string.IsNullOrEmpty(updateLectureDto.Speaker))
-                lecture.Speaker = updateLectureDto.Speaker;
-
-            if (updateLectureDto.Type.HasValue)
-                lecture.Type = updateLectureDto.Type.Value;
+            //if (updateLectureDto.Type.HasValue)
+            //    lecture.Type = updateLectureDto.Type.Value;
 
             if (!string.IsNullOrEmpty(updateLectureDto.VideoUrl))
                 lecture.VideoUrl = updateLectureDto.VideoUrl;
 
-            if (!string.IsNullOrEmpty(updateLectureDto.ThumbnailUrl))
-                lecture.ThumbnailUrl = updateLectureDto.ThumbnailUrl;
+            //if (!string.IsNullOrEmpty(updateLectureDto.ThumbnailUrl))
+            //    lecture.ThumbnailUrl = updateLectureDto.ThumbnailUrl;
 
-            if (updateLectureDto.ConsultationId.HasValue)
-                lecture.ConsultationId = updateLectureDto.ConsultationId;
+            //if (updateLectureDto.ConsultationId.HasValue)
+            //    lecture.ConsultationId = updateLectureDto.ConsultationId;
 
-            if (updateLectureDto.Tags != null)
-                lecture.Tags = System.Text.Json.JsonSerializer.Serialize(updateLectureDto.Tags);
+            //if (updateLectureDto.Tags != null)
+            //    lecture.Tags = System.Text.Json.JsonSerializer.Serialize(updateLectureDto.Tags);
 
             lecture.UpdatedAt = DateTime.UtcNow;
 
@@ -135,7 +140,7 @@ namespace BLL.Service
             if (lecture == null)
                 return false;
 
-            await _lectureRepository.DeleteAsync(lecture);
+            await _lectureRepository.DeleteAsync(id);
             return true;
         }
 
@@ -169,51 +174,51 @@ namespace BLL.Service
 
 
 
-        public async Task<List<LectureDTO>> GetLecturesByConsultationAsync(int consultationId)
-        {
-            var lectures = await _lectureRepository.GetByConsultationIdAsync(consultationId);
-            return _mapper.Map<List<LectureDTO>>(lectures);
-        }
+        //public async Task<List<LectureDTO>> GetLecturesByConsultationAsync(int consultationId)
+        //{
+        //    var lectures = await _lectureRepository.GetByConsultationIdAsync(consultationId);
+        //    return _mapper.Map<List<LectureDTO>>(lectures);
+        //}
 
-        public async Task<List<LectureDTO>> GetLecturesByTypeAsync(LectureType type)
-        {
-            var lectures = await _lectureRepository.GetByTypeAsync(type);
-            return _mapper.Map<List<LectureDTO>>(lectures);
-        }
+        //public async Task<List<LectureDTO>> GetLecturesByTypeAsync(LectureType type)
+        //{
+        //    var lectures = await _lectureRepository.GetByTypeAsync(type);
+        //    return _mapper.Map<List<LectureDTO>>(lectures);
+        //}
 
-        public async Task<List<LectureDTO>> GetRelatedLecturesAsync(int id)
-        {
-            var lecture = await _lectureRepository.GetByIdAsync(id);
-            if (lecture == null)
-                return new List<LectureDTO>();
+        //public async Task<List<LectureDTO>> GetRelatedLecturesAsync(int id)
+        //{
+        //    var lecture = await _lectureRepository.GetByIdAsync(id);
+        //    if (lecture == null)
+        //        return new List<LectureDTO>();
 
-            var relatedLectures = await _lectureRepository.GetByConsultationIdAsync(lecture.ConsultationId ?? 0);
-            relatedLectures = relatedLectures.Where(l => l.Id != id).Take(5).ToList();
+        //    var relatedLectures = await _lectureRepository.GetByConsultationIdAsync(lecture.ConsultationId ?? 0);
+        //    relatedLectures = relatedLectures.Where(l => l.Id != id).Take(5).ToList();
 
-            return _mapper.Map<List<LectureDTO>>(relatedLectures);
-        }
+        //    return _mapper.Map<List<LectureDTO>>(relatedLectures);
+        //}
 
-        public async Task<bool> IncrementViewCountAsync(int id)
-        {
-            var lecture = await _lectureRepository.GetByIdAsync(id);
-            if (lecture == null)
-                return false;
+        //public async Task<bool> IncrementViewCountAsync(int id)
+        //{
+        //    var lecture = await _lectureRepository.GetByIdAsync(id);
+        //    if (lecture == null)
+        //        return false;
 
-            lecture.ViewCount++;
-            await _lectureRepository.UpdateAsync(lecture);
-            return true;
-        }
+        //    lecture.ViewCount++;
+        //    await _lectureRepository.UpdateAsync(lecture);
+        //    return true;
+        //}
 
-        public async Task<bool> IncrementDownloadCountAsync(int id)
-        {
-            var lecture = await _lectureRepository.GetByIdAsync(id);
-            if (lecture == null)
-                return false;
+        //public async Task<bool> IncrementDownloadCountAsync(int id)
+        //{
+        //    var lecture = await _lectureRepository.GetByIdAsync(id);
+        //    if (lecture == null)
+        //        return false;
 
-            lecture.DownloadCount++;
-            await _lectureRepository.UpdateAsync(lecture);
-            return true;
-        }
+        //    lecture.DownloadCount++;
+        //    await _lectureRepository.UpdateAsync(lecture);
+        //    return true;
+        //}
 
         public async Task<string> GetVideoStreamUrlAsync(int id)
         {
@@ -228,29 +233,29 @@ namespace BLL.Service
         public async Task<object> GetLectureStatisticsAsync()
         {
             var lectures = await _lectureRepository.GetAllAsync();
-            
+
             return new
             {
                 TotalLectures = lectures.Count(),
                 PublishedLectures = lectures.Count(l => l.IsPublished),
-                TotalViews = lectures.Sum(l => l.ViewCount),
-                TotalDownloads = lectures.Sum(l => l.DownloadCount),
-                MostViewedLectures = await _lectureRepository.GetMostViewedLecturesAsync(5)
+                //TotalViews = lectures.Sum(l => l.ViewCount),
+                //TotalDownloads = lectures.Sum(l => l.DownloadCount),
+                //MostViewedLectures = await _lectureRepository.GetMostViewedLecturesAsync(5)
             };
         }
 
-        public async Task<object> GetLectureStatisticsByConsultationAsync(int consultationId)
-        {
-            var lectures = await _lectureRepository.GetByConsultationIdAsync(consultationId);
-            
-            return new
-            {
-                TotalLectures = lectures.Count,
-                PublishedLectures = lectures.Count(l => l.IsPublished),
-                TotalViews = lectures.Sum(l => l.ViewCount),
-                TotalDownloads = lectures.Sum(l => l.DownloadCount)
-            };
-        }
+        //public async Task<object> GetLectureStatisticsByConsultationAsync(int consultationId)
+        //{
+        //    var lectures = await _lectureRepository.GetByConsultationIdAsync(consultationId);
+
+        //    return new
+        //    {
+        //        TotalLectures = lectures.Count,
+        //        PublishedLectures = lectures.Count(l => l.IsPublished),
+        //        TotalViews = lectures.Sum(l => l.ViewCount),
+        //        TotalDownloads = lectures.Sum(l => l.DownloadCount)
+        //    };
+        //}
 
         public async Task<string> GenerateThumbnailAsync(int id)
         {
@@ -262,17 +267,17 @@ namespace BLL.Service
             return $"/thumbnails/{id}.jpg";
         }
 
-        public async Task<bool> UpdateThumbnailAsync(int id, string thumbnailUrl)
-        {
-            var lecture = await _lectureRepository.GetByIdAsync(id);
-            if (lecture == null)
-                return false;
+        //public async Task<bool> UpdateThumbnailAsync(int id, string thumbnailUrl)
+        //{
+        //    var lecture = await _lectureRepository.GetByIdAsync(id);
+        //    if (lecture == null)
+        //        return false;
 
-            lecture.ThumbnailUrl = thumbnailUrl;
-            lecture.UpdatedAt = DateTime.UtcNow;
-            await _lectureRepository.UpdateAsync(lecture);
-            return true;
-        }
+        //    //lecture.ThumbnailUrl = thumbnailUrl;
+        //    lecture.UpdatedAt = DateTime.UtcNow;
+        //    await _lectureRepository.UpdateAsync(lecture);
+        //    return true;
+        //}
 
         public async Task<bool> DeleteVideoAsync(int lectureId)
         {
@@ -300,16 +305,13 @@ namespace BLL.Service
         public async Task<PaginatedResponse<LectureDTO>> SearchLecturesAsync(LectureSearchDTO searchDto)
         {
             var lectures = await _lectureRepository.SearchLecturesAsync(searchDto.SearchTerm);
-            
+
             // Apply additional filters
-            if (searchDto.Type.HasValue)
-                lectures = lectures.Where(l => l.Type == searchDto.Type.Value).ToList();
+            //if (searchDto.Type.HasValue)
+            //    lectures = lectures.Where(l => l.Type == searchDto.Type.Value).ToList();
 
-            if (searchDto.ConsultationId.HasValue)
-                lectures = lectures.Where(l => l.ConsultationId == searchDto.ConsultationId.Value).ToList();
-
-            if (!string.IsNullOrEmpty(searchDto.Speaker))
-                lectures = lectures.Where(l => l.Speaker.Contains(searchDto.Speaker)).ToList();
+            //if (searchDto.ConsultationId.HasValue)
+            //    lectures = lectures.Where(l => l.ConsultationId == searchDto.ConsultationId.Value).ToList();
 
             // Apply pagination
             var totalCount = lectures.Count;
@@ -345,7 +347,7 @@ namespace BLL.Service
                 // Check if it's a supported video platform
                 var host = uri.Host.ToLower();
                 var supportedPlatforms = new[] { "youtube.com", "youtu.be", "vimeo.com", "dailymotion.com" };
-                
+
                 return supportedPlatforms.Any(platform => host.Contains(platform));
             }
             catch
@@ -353,5 +355,9 @@ namespace BLL.Service
                 return false;
             }
         }
+        public async Task<int> GetTotalLecturesCountAsync()
+        {
+            return await _lectureRepository.CountAsync();
+        }
     }
-} 
+}

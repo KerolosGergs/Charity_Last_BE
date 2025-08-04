@@ -92,5 +92,16 @@ namespace DAL.Repositories.RepositoryClasses
                 .OrderByDescending(v => v.CreatedAt)
                 .ToListAsync();
         }
+        public async Task<VolunteerApplication> GetByIdAsyncWithRelatedData(int id)
+        {
+            return await _context.VolunteerApplications
+                .Include(v => v.User)
+                .FirstOrDefaultAsync(v => v.Id == id);
+        }
+        public async Task<int> GetApplicationCountByStatusAsync(VolunteerStatus status)
+        {
+            return await _context.VolunteerApplications
+                .CountAsync(v => v.Status == status);
+        }
     }
 } 

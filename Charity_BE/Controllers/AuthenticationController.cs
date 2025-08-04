@@ -63,7 +63,7 @@ namespace Charity_BE.Controllers
 
         // POST: api/authentication/register-admin
         [HttpPost("register-admin")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<AuthResponseDTO>>> RegisterAdmin([FromBody] RegisterAdminDTO registerDto)
         {
             if (!ModelState.IsValid)
@@ -86,7 +86,7 @@ namespace Charity_BE.Controllers
 
         // POST: api/authentication/register-advisor
         [HttpPost("register-advisor")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<AuthResponseDTO>>> RegisterAdvisor([FromBody] RegisterAdvisorDTO registerDto)
         {
             if (!ModelState.IsValid)
@@ -109,7 +109,7 @@ namespace Charity_BE.Controllers
 
         // GET: api/authentication/me
         [HttpGet("me")]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<ApiResponse<CurrentUserDTO>>> GetCurrentUser()
         {
             try

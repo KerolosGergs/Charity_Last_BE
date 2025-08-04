@@ -31,10 +31,33 @@ namespace BLL.Service
 
         public async Task<List<AdviceRequestDTO>> GetAllRequestsAsync()
         {
-            var requests = await _adviceRequestRepository.GetAllAsync();
-            return _mapper.Map<List<AdviceRequestDTO>>(requests);
-        }
+            var requests = await _adviceRequestRepository.GetAllRequestsWithDetailsAsync();
+            List<AdviceRequestDTO> requestDTOs = requests.Select(r => new AdviceRequestDTO
+            {
+                Id= r.Id,
+                UserId = r.UserId,
+                UserName = r.User.FullName,
+                AdvisorId = r.AdvisorId,
+                AdvisorName = r.Advisor.FullName,
+                ConsultationId = r.ConsultationId,
+                ConsultationName = r.Consultation.ConsultationName,
+                Title = r.Title,
+                Description = r.Description,
+                Status= r.Status.ToString(),
+                Priority = r.Priority,
+                RequestDate = r.RequestDate,
+                ConfirmedDate = r.ConfirmedDate,
+                Response = r.Response,
+                Rating = r.Rating,
+                Review = r.Review,
+                ConsultationType = r.ConsultationType
 
+            }
+            ).ToList();
+            return requestDTOs;
+            //return _mapper.Map<List<AdviceRequestDTO>>(requests);
+        }
+        
         public async Task<List<AdviceRequestDTO>> GetUserRequestsAsync(string userId)
         {
             var requests = await _adviceRequestRepository.GetByUserIdAsync(userId);
@@ -43,7 +66,7 @@ namespace BLL.Service
 
         public async Task<AdviceRequestDTO> GetRequestByIdAsync(int id)
         {
-            var request = await _adviceRequestRepository.GetByIdAsync(id);
+            var request = await _adviceRequestRepository.GetRequestByIdWithDetailsAsync(id);
             return _mapper.Map<AdviceRequestDTO>(request);
         }
 
@@ -61,7 +84,7 @@ namespace BLL.Service
             request.RequestDate = DateTime.UtcNow;
             request.AdvisorAvailabilityId = createRequestDto.AdvisorAvailabilityId;
             request.AdvisorId = availability.AdvisorId;
-
+            request.ConsultationType = availability.ConsultationType;
             availability.IsBooked = true;
 
             availability.AdviceRequestId = null;
@@ -75,7 +98,7 @@ namespace BLL.Service
 
         public async Task<AdviceRequestDTO> UpdateRequestAsync(int id, string userId, UpdateAdviceRequestDTO updateRequestDto)
         {
-            var request = await _adviceRequestRepository.GetByIdAsync(id);
+            var request = await _adviceRequestRepository.GetRequestByIdWithDetailsAsync(id);
             if (request == null || request.UserId != userId)
                 return null;
 
@@ -92,11 +115,34 @@ namespace BLL.Service
 
             if (!string.IsNullOrEmpty(updateRequestDto.Priority))
                 request.Priority = updateRequestDto.Priority;
+            if (updateRequestDto.AdvisorAvailabilityId.HasValue)
+            {
+                var availability = await _advisorRepository.GetAvailabilityByIdAsync(updateRequestDto.AdvisorAvailabilityId.Value);
+                if (availability == null)
+                    throw new InvalidOperationException("الموعد المتاح غير موجود.");
+                if (availability.IsBooked)
+                    throw new InvalidOperationException("هذا الموعد تم حجزه بالفعل.");
+                // Unbook previous availability if exists
+                if (request.AdvisorAvailabilityId.HasValue)
+                {
+                    var previousAvailability = await _advisorRepository.GetAvailabilityByIdAsync(request.AdvisorAvailabilityId.Value);
+                    if (previousAvailability != null)
+                    {
+                        previousAvailability.IsBooked = false;
+                        previousAvailability.AdviceRequestId = null;
+                        await _advisorRepository.UpdateAvailabilityAsync(previousAvailability);
+                    }
+                }
+                request.AdvisorAvailabilityId = updateRequestDto.AdvisorAvailabilityId.Value;
+                request.AdvisorId = availability.AdvisorId;
+                availability.IsBooked = true;
+                availability.AdviceRequestId = request.Id;
+                await _advisorRepository.UpdateAvailabilityAsync(availability);
+            }
 
             var updatedRequest = await _adviceRequestRepository.UpdateAsync(request);
             return _mapper.Map<AdviceRequestDTO>(updatedRequest);
         }
-
         public async Task<bool> CancelRequestAsync(int id, string userId)
         {
             var request = await _adviceRequestRepository.GetByIdAsync(id);
@@ -157,7 +203,30 @@ namespace BLL.Service
         public async Task<List<AdviceRequestDTO>> GetRequestsByAdvisorAsync(int advisorId)
         {
             var requests = await _adviceRequestRepository.GetByAdvisorIdAsync(advisorId);
-            return _mapper.Map<List<AdviceRequestDTO>>(requests);
+            List<AdviceRequestDTO> requestDTOs = requests.Select(r => new AdviceRequestDTO
+            {
+                Id = r.Id,
+                UserId = r.UserId,
+                UserName = r.User.FullName,
+                AdvisorId = r.AdvisorId,
+                AdvisorName = r.Advisor.FullName,
+                ConsultationId = r.ConsultationId,
+                ConsultationName = r.Consultation.ConsultationName,
+                Title = r.Title,
+                Description = r.Description,
+                Status = r.Status.ToString(),
+                Priority = r.Priority,
+                RequestDate = r.RequestDate,
+                ConfirmedDate = r.ConfirmedDate,
+                Response = r.Response,
+                Rating = r.Rating,
+                Review = r.Review,
+                ConsultationType = r.ConsultationType
+
+            }
+           ).ToList();
+            return requestDTOs;
+            //return _mapper.Map<List<AdviceRequestDTO>>(requests);
         }
 
         public async Task<List<AdviceRequestDTO>> GetRequestsByConsultationAsync(int consultationId)
@@ -169,7 +238,7 @@ namespace BLL.Service
         public async Task<object> GetRequestStatisticsAsync()
         {
             var requests = await _adviceRequestRepository.GetAllAsync();
-            
+
             return new
             {
                 TotalRequests = requests.Count(),
@@ -178,6 +247,10 @@ namespace BLL.Service
                 CompletedRequests = requests.Count(r => r.Status == ConsultationStatus.Completed),
                 CancelledRequests = requests.Count(r => r.Status == ConsultationStatus.Cancelled)
             };
+        }
+        public async Task<int> GetTotalRequestsCountAsync()
+        {
+            return await _adviceRequestRepository.CountAsync();
         }
     }
 } 

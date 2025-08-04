@@ -78,17 +78,17 @@ namespace DAL.Data
                 .HasForeignKey(ar => ar.ConsultationId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Lecture>()
-                .HasOne(l => l.Consultation)
-                .WithMany(c => c.Lectures)
-                .HasForeignKey(l => l.ConsultationId)
-                .OnDelete(DeleteBehavior.SetNull);
+            //builder.Entity<Lecture>()
+            //    .HasOne(l => l.Consultation)
+            //    .WithMany(c => c.Lectures)
+            //    .HasForeignKey(l => l.ConsultationId)
+            //    .OnDelete(DeleteBehavior.SetNull);
 
-            builder.Entity<Lecture>()
-                .HasOne(l => l.CreatedByUser)
-                .WithMany()
-                .HasForeignKey(l => l.CreatedBy)
-                .OnDelete(DeleteBehavior.Restrict);
+            //builder.Entity<Lecture>()
+            //    .HasOne(l => l.CreatedByUser)
+            //    .WithMany()
+            //    .HasForeignKey(l => l.CreatedBy)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<AdvisorAvailability>()
                 .HasOne(a => a.AdviceRequest)

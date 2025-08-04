@@ -219,12 +219,13 @@ namespace DAL.Repositories.RepositoryClasses
         {
             return await _context.AdviceRequests
                 .Include(r => r.User)
+                .Include(r => r.Advisor)
+                .ThenInclude(a => a.Availabilities)
                 .Include(r => r.Consultation)
                 .Where(r => r.AdvisorId == advisorId)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
         }
-
         public async Task<List<AdviceRequest>> GetByConsultationIdAsync(int consultationId)
         {
             return await _context.AdviceRequests

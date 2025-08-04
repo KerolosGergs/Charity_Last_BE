@@ -56,5 +56,9 @@ namespace DAL.Repositories.GenericRepositries
             await _dbContext.SaveChangesAsync();
             return entity;
         }
+        public async Task<int> CountAsync()
+        {
+            return await _dbContext.Set<TEntity>().CountAsync();
+        }
     }
 }

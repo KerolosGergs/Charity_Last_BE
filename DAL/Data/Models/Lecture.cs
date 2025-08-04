@@ -18,20 +18,14 @@ namespace DAL.Data.Models
         [StringLength(2000)]
         public string Description { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string Speaker { get; set; }
-
-        [Required]
-        public LectureType Type { get; set; }
+        //[Required]
+        //public LectureType Type { get; set; }
 
         [StringLength(500)]
         public string VideoUrl { get; set; }
 
-        [StringLength(500)]
-        public string? ThumbnailUrl { get; set; }
-
-        public int? Duration { get; set; } // in seconds
+        //[StringLength(500)]
+        //public string? ThumbnailUrl { get; set; }
 
         public bool IsPublished { get; set; } = false;
 
@@ -43,22 +37,30 @@ namespace DAL.Data.Models
 
         public DateTime? UpdatedAt { get; set; }
 
-        public int ViewCount { get; set; } = 0;
+        //public int ViewCount { get; set; } = 0;
 
-        public int DownloadCount { get; set; } = 0;
+        //public int DownloadCount { get; set; } = 0;
 
-        public int? ConsultationId { get; set; }
-        public Consultation Consultation { get; set; }
+        //public int? ConsultationId { get; set; }
+        //public Consultation Consultation { get; set; }
 
-        [StringLength(1000)]
-        public string Tags { get; set; } // JSON array of tags
+        //[StringLength(1000)]
+        //public string Tags { get; set; } // JSON array of tags
 
-        [StringLength(450)]
-        public string CreatedBy { get; set; }
+        //[StringLength(450)]
+        //public string CreatedBy { get; set; }
 
-        [ForeignKey("CreatedBy")]
-        public ApplicationUser CreatedByUser { get; set; }
+        //[ForeignKey("CreatedBy")]
+        //public ApplicationUser CreatedByUser { get; set; }
     }
+
+    //public enum LectureType
+    //{
+    //    Video,
+    //    Audio,
+    //    Document,
+    //    Presentation
+    //}
 
     public enum LectureStatus
     {
@@ -67,4 +69,4 @@ namespace DAL.Data.Models
         Archived,
         Pending
     }
-} 
+}

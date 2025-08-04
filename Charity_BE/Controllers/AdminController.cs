@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BLL.Service;
+using Shared.DTOS.NotificationDTOs;
 
 namespace Charity_BE.Controllers
 {
@@ -16,10 +18,14 @@ namespace Charity_BE.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly INotificationService _notificationService;
+        private readonly IAdminDashboardCount _adminDashboardCount;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService, INotificationService notificationService, IAdminDashboardCount adminDashboardCount)
         {
             _adminService = adminService;
+            _notificationService = notificationService;
+            _adminDashboardCount = adminDashboardCount;
         }
 
         // GET: api/admin
@@ -94,13 +100,13 @@ namespace Charity_BE.Controllers
         public async Task<ActionResult<ApiResponse<AdminDTO>>> CreateAdmin([FromBody] CreateAdminDTO createAdminDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<AdminDTO>.ErrorResult("Invalid input data", 400, 
+                return BadRequest(ApiResponse<AdminDTO>.ErrorResult("Invalid input data", 400,
                     ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()));
 
             try
             {
                 var admin = await _adminService.CreateAdminAsync(createAdminDto);
-                return CreatedAtAction(nameof(GetAdminById), new { id = admin.Id }, 
+                return CreatedAtAction(nameof(GetAdminById), new { id = admin.Id },
                     ApiResponse<AdminDTO>.SuccessResult(admin, "Admin created successfully"));
             }
             catch (Exception ex)
@@ -132,7 +138,7 @@ namespace Charity_BE.Controllers
 
         // DELETE: api/admin/{id}
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAdmin(int id)
         {
             try
@@ -279,5 +285,49 @@ namespace Charity_BE.Controllers
                 return StatusCode(500, ApiResponse<bool>.ErrorResult("Failed to send notification", 500));
             }
         }
+        [HttpGet("notifications")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<List<NotificationDTO>>>> GetMyNotifications(
+            [FromQuery] string userId,
+            [FromQuery] bool onlyUnread = false)
+        {
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(ApiResponse<List<NotificationDTO>>.ErrorResult("User ID is missing", 401));
+
+            var notifications = await _notificationService.GetUserNotificationsAsync(userId, onlyUnread);
+            return Ok(ApiResponse<List<NotificationDTO>>.SuccessResult(notifications));
+        }
+        [HttpPatch("notifications/{notificationId}/read")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<string>>> MarkNotificationAsRead(int notificationId)
+        {
+            try
+            {
+                await _notificationService.MarkAsReadAsync(notificationId);
+                return Ok(ApiResponse<string>.SuccessResult("Notification marked as read successfully"));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(ApiResponse<string>.ErrorResult("Notification not found", 404));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, ApiResponse<string>.ErrorResult("An error occurred while marking the notification as read", 500));
+            }
+        }
+        [HttpGet("dashboard/statistics")]
+        public async Task<ActionResult<ApiResponse<DashboardStatisticsDTO>>> GetDashboardStatistics()
+        {
+            try
+            {
+                var result = await _adminDashboardCount.Count();
+                return Ok(ApiResponse<DashboardStatisticsDTO>.SuccessResult(result));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<DashboardStatisticsDTO>.ErrorResult(ex.Message, 500));
+            }
+        }
+
     }
-} 
+}

@@ -35,7 +35,7 @@ namespace Charity_BE.Controllers
 
         // POST: api/helptype
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<HelpTypeDTO>> Create([FromBody] CreateHelpTypeDTO dto)
         {
             var created = await _service.CreateAsync(dto);
@@ -44,7 +44,7 @@ namespace Charity_BE.Controllers
 
         // PUT: api/helptype/{id}
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<HelpTypeDTO>> Update(int id, [FromBody] CreateHelpTypeDTO dto)
         {
             var updated = await _service.UpdateAsync(id, dto);
@@ -54,7 +54,7 @@ namespace Charity_BE.Controllers
 
         // DELETE: api/helptype/{id}
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _service.DeleteAsync(id);

@@ -14,5 +14,6 @@ namespace BLL.ServiceAbstraction
 
         // Statistics
         Task<object> GetComplaintStatisticsAsync();
+        Task<int> GetTotalComplaintsCountAsync();
     }
 } 

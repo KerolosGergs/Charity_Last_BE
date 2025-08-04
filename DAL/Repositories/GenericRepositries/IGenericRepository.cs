@@ -16,5 +16,6 @@ namespace DAL.Repositries.GenericRepositries
         void Delete(TEntity entity);
         Task<bool> DeleteAsync(object id);
         Task<int> SaveChangesAsync();
+        Task<int> CountAsync();
     }
 }

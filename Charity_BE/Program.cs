@@ -111,7 +111,8 @@ namespace Charity_BE
             builder.Services.AddScoped<IMediationService, MediationService>();
             builder.Services.AddScoped<IHelpTypeService, HelpTypeService>();
             builder.Services.AddScoped<IHelpRequestService, HelpRequestService>();
-
+            builder.Services.AddScoped<IReconcileRequestService, ReconcileRequestService>();
+            builder.Services.AddScoped<IAdminDashboardCount, AdminDashboardCount>();
 
             // Service Registrations
             builder.Services.AddScoped<IAuthService, AuthService>();

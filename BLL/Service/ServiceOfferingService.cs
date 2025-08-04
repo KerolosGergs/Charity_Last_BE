@@ -3,6 +3,7 @@ using BLL.ServiceAbstraction;
 using DAL.Repositories.RepositoryIntrfaces;
 using DAL.Data.Models;
 using Shared.DTOS.ServiceOfferingDTOs;
+using BLL.Services.FileService;
 
 namespace BLL.Service
 {
@@ -44,7 +45,9 @@ namespace BLL.Service
         {
             var service = _mapper.Map<ServiceOffering>(createServiceDto);
             service.CreatedAt = DateTime.UtcNow;
-
+            FileService fs = new FileService();
+            var imgUrl = await fs.UploadFileAsync(createServiceDto.Image, "serviceOffering");
+            service.ImageUrl = imgUrl;
             var createdService = await _serviceOfferingRepository.AddAsync(service);
             return _mapper.Map<ServiceOfferingDTO>(createdService);
         }
@@ -65,8 +68,13 @@ namespace BLL.Service
             if (!string.IsNullOrEmpty(updateServiceDto.Category))
                 service.Category = updateServiceDto.Category;
 
-            if (!string.IsNullOrEmpty(updateServiceDto.ImageUrl))
-                service.ImageUrl = updateServiceDto.ImageUrl;
+            if (updateServiceDto.Image != null)
+            {
+                FileService fs = new FileService();
+                fs.DeleteFile(service.ImageUrl);
+                var imgUrl = await fs.UploadFileAsync(updateServiceDto.Image, "serviceOffering");
+                service.ImageUrl = imgUrl;
+            }
 
             if (updateServiceDto.IsActive.HasValue)
                 service.IsActive = updateServiceDto.IsActive.Value;
@@ -89,7 +97,7 @@ namespace BLL.Service
             if (service == null)
                 return false;
 
-            await _serviceOfferingRepository.DeleteAsync(service);
+            await _serviceOfferingRepository.DeleteAsync(id);
             return true;
         }
 
@@ -149,6 +157,10 @@ namespace BLL.Service
         public async Task<List<string>> GetServiceLocationsAsync()
         {
             return await _serviceOfferingRepository.GetServiceLocationsAsync();
+        }
+        public async Task<int> GetTotalServicesCountAsync()
+        {
+            return await _serviceOfferingRepository.CountAsync();
         }
     }
 } 

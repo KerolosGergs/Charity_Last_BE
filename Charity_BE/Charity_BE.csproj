@@ -23,6 +23,8 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\advisorImage\" />
+    <Folder Include="wwwroot\mediationImage\" />
+    <Folder Include="wwwroot\serviceOffering\" />
     <Folder Include="wwwroot\newsImage\" />
   </ItemGroup>
 

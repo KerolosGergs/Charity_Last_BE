@@ -213,7 +213,13 @@ namespace BLL.Service
         public async Task<AuthResponseDTO> LoginAsync(LoginDTO dto)
         {
             var normalizedEmail = dto.Email?.Trim().ToUpperInvariant();
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
+
+            // لازم Include للـ Navigation Properties علشان نجيب RoleId
+            var user = await _userManager.Users
+                .Include(u => u.Advisor)
+                .Include(u => u.Admin)
+                .Include(u => u.Mediation)
+                .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
 
             if (user == null)
                 throw new Exception("Invalid credentials");
@@ -225,6 +231,15 @@ namespace BLL.Service
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault() ?? "User";
 
+            // استخراج RoleId حسب نوع الدور
+            int? roleId = role switch
+            {
+                "Advisor" => user.Advisor?.Id,
+                "Admin" => user.Admin?.Id,
+                "Mediation" => user.Mediation?.Id,
+                _ => null
+            };
+
             var token = await CreateTokenAsync(user);
 
             return new AuthResponseDTO
@@ -232,6 +247,7 @@ namespace BLL.Service
                 FullName = user.FullName,
                 Email = user.Email,
                 Role = role,
+                RoleId = roleId,
                 Token = token,
                 User = new CurrentUserDTO
                 {
@@ -244,10 +260,9 @@ namespace BLL.Service
                 Success = true,
                 ExpiresAt = DateTime.UtcNow.AddDays(double.Parse(_configuration["JWT:DurationInDays"]!)),
                 Message = "Login successful",
-                RefreshToken = null // Implement refresh token logic if needed
+                RefreshToken = null
             };
         }
-
         public async Task<CurrentUserDTO> GetCurrentUserAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);

@@ -14,6 +14,8 @@ using Shared.DTOS.UserDTO;
 using Shared.DTOS.VolunteerDTOs;
 using Shared.DTOS.NotificationDTOs;
 using Shared.DTOS.MediationDTOs;
+using Shared.DTOS.HelpDTOs;
+using Shared.DTOS.ReconcileRequestDTOs;
 
 namespace BLL.Mapping
 {
@@ -54,22 +56,26 @@ namespace BLL.Mapping
 
             // Advice Request Mappings
             CreateMap<AdviceRequest, AdviceRequestDTO>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName))
                 .ForMember(dest => dest.AdvisorName, opt => opt.MapFrom(src => src.Advisor.FullName))
                 .ForMember(dest => dest.ConsultationName, opt => opt.MapFrom(src => src.Consultation.ConsultationName))
-                .ForMember(dest => dest.ConsultationType, opt => opt.MapFrom(src => src.ConsultationType));
+                .ForMember(dest => dest.ConsultationType, opt => opt.MapFrom(src => src.ConsultationType))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+                
             CreateMap<CreateAdviceRequestDTO, AdviceRequest>()
                 .ForMember(dest => dest.ConsultationType, opt => opt.MapFrom(src => src.ConsultationType));
             CreateMap<UpdateAdviceRequestDTO, AdviceRequest>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-
+            CreateMap<AdviceRequest,AdvisorRequestDTO>();
             // Complaint Mappings
-            CreateMap<Complaint, ComplaintDTO>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName));
+           
             CreateMap<CreateComplaintDTO, Complaint>();
             CreateMap<UpdateComplaintDTO, Complaint>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-
+            CreateMap<Complaint, ComplaintDTO>()
+               .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName))
+                .ForMember(dest => dest.email, opt => opt.MapFrom(src => src.User.Email))
+                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.User.PhoneNumber));
             // Consultation Mappings
             CreateMap<Consultation, ConsultationDTO>();
             CreateMap<CreateConsultationDTO, Consultation>();
@@ -77,17 +83,15 @@ namespace BLL.Mapping
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // Lecture Mappings
-            CreateMap<Lecture, LectureDTO>()
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
-                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => DeserializeTags(src.Tags)))
-                .ForMember(dest => dest.ConsultationName, opt => opt.MapFrom(src => src.Consultation != null ? src.Consultation.ConsultationName : null))
-                .ForMember(dest => dest.CreatedByName, opt => opt.MapFrom(src => src.CreatedByUser != null ? src.CreatedByUser.FullName : null));
-            CreateMap<CreateLectureDTO, Lecture>()
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type))
-                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => SerializeTags(src.Tags)));
-            CreateMap<LectureDTO, Lecture>()
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => Enum.Parse<LectureType>(src.Type)))
-                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => SerializeTags(src.Tags)));
+            CreateMap<Lecture, LectureDTO>();
+            //.ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
+            //.ForMember(dest => dest.Tags, opt => opt.MapFrom(src => DeserializeTags(src.Tags)));
+            CreateMap<CreateLectureDTO, Lecture>();
+            //.ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type))
+            //.ForMember(dest => dest.Tags, opt => opt.MapFrom(src => SerializeTags(src.Tags)));
+            CreateMap<LectureDTO, Lecture>();
+                //.ForMember(dest => dest.Type, opt => opt.MapFrom(src => Enum.Parse<LectureType>(src.Type)))
+                //.ForMember(dest => dest.Tags, opt => opt.MapFrom(src => SerializeTags(src.Tags)));
             CreateMap<UpdateLectureDTO, Lecture>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
@@ -136,6 +140,33 @@ namespace BLL.Mapping
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName));
             CreateMap<Shared.DTOS.MediationDTOs.UpdateMediationDTO, Mediation>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<HelpRequest, HelpRequestDTO>()
+                .ForMember(dest => dest.HelpTypeName, opt => opt.MapFrom(src => src.HelpType.Name));
+            CreateMap<CreateHelpRequestDTO, HelpRequest>();
+
+            CreateMap<HelpType, HelpTypeDTO>();
+            CreateMap<CreateHelpTypeDTO, HelpType>();
+
+            CreateMap<ReconcileRequest, ReconcileRequestDTO>();
+            CreateMap<ReconcileRequestDTO, ReconcileRequest>();
+
+            CreateMap<CreateReconcileRequestDTO, ReconcileRequest>();
+
+            CreateMap<AdviceRequest, GetAdvisorRequestDTO>()
+                .ForMember(dest => dest.UserFullName, opt => opt.MapFrom(src => src.User.FullName))
+                .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email))
+                .ForMember(dest => dest.AdvisorFullName, opt => opt.MapFrom(src => src.Advisor.FullName))
+                .ForMember(dest => dest.ConsultationName, opt => opt.MapFrom(src => src.Consultation.ConsultationName))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src =>
+                    src.Advisor.Availabilities.FirstOrDefault(a => a.Id == src.AdvisorAvailabilityId)!.Date))
+                .ForMember(dest => dest.Time, opt => opt.MapFrom(src =>
+                    src.Advisor.Availabilities.FirstOrDefault(a => a.Id == src.AdvisorAvailabilityId)!.Time))
+                .ForMember(dest => dest.Duration, opt => opt.MapFrom(src =>
+                    src.Advisor.Availabilities.FirstOrDefault(a => a.Id == src.AdvisorAvailabilityId)!.Duration))
+                .ForMember(dest => dest.Notes, opt => opt.MapFrom(src =>
+                    src.Advisor.Availabilities.FirstOrDefault(a => a.Id == src.AdvisorAvailabilityId)!.Notes));
         }
 
         private static List<string> DeserializeTags(string tags)

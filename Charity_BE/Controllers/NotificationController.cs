@@ -22,37 +22,47 @@ namespace Charity_BE.Controllers
 
         // GET: api/notification
         [HttpGet]
-        [Authorize]
-        public async Task<ActionResult<ApiResponse<List<NotificationDTO>>>> GetUserNotifications(bool onlyUnread = false)
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<List<NotificationDTO>>>> GetMyNotifications(
+        [FromQuery] string userId,
+        [FromQuery] bool onlyUnread = false)
         {
-            var userId = User.FindFirst("sub")?.Value;
             if (string.IsNullOrEmpty(userId))
-                return Unauthorized(ApiResponse<List<NotificationDTO>>.ErrorResult("User not authenticated", 401));
+                return Unauthorized(ApiResponse<List<NotificationDTO>>.ErrorResult("User ID is missing", 401));
 
             var notifications = await _notificationService.GetUserNotificationsAsync(userId, onlyUnread);
             return Ok(ApiResponse<List<NotificationDTO>>.SuccessResult(notifications));
         }
-
-        // POST: api/notification/mark-as-read/{id}
-        [HttpPost("mark-as-read/{id}")]
-        [Authorize]
-        public async Task<ActionResult<ApiResponse<bool>>> MarkAsRead(int id)
+        [HttpPatch("{notificationId}/read")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<string>>> MarkNotificationAsRead(int notificationId)
         {
-            await _notificationService.MarkAsReadAsync(id);
-            return Ok(ApiResponse<bool>.SuccessResult(true, "Notification marked as read"));
-        }
-
-        // POST: api/notification/send
-        [HttpPost("send")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<bool>>> SendNotification([FromBody] NotificationCreateDTO notificationDto, [FromQuery] string toEmail)
-        {
-            await _notificationService.AddNotificationAsync(notificationDto);
-            if (!string.IsNullOrEmpty(toEmail))
+            try
             {
-                await _emailService.SendEmailAsync(toEmail, notificationDto.Title, notificationDto.Message);
+                await _notificationService.MarkAsReadAsync(notificationId);
+                return Ok(ApiResponse<string>.SuccessResult("Notification marked as read successfully"));
             }
-            return Ok(ApiResponse<bool>.SuccessResult(true, "Notification sent successfully"));
+            catch (KeyNotFoundException)
+            {
+                return NotFound(ApiResponse<string>.ErrorResult("Notification not found", 404));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, ApiResponse<string>.ErrorResult("An error occurred while marking the notification as read", 500));
+            }
+        }
+        [HttpDelete("{notificationId}")]
+        public ActionResult DeleteNotification(int notificationId)
+        {
+            var result = _notificationService.DeleteNotificationAsync(notificationId);
+            if (result.Result)
+            {
+                return Ok(ApiResponse<string>.SuccessResult("Notification deleted successfully"));
+            }
+            else
+            {
+                return NotFound(ApiResponse<string>.ErrorResult("Notification not found", 404));
+            }
         }
     }
 } 

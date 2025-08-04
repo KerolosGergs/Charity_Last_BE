@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Shared.DTOS.AdviceRequestDTOs;
 using Shared.DTOS.AdvisorDTOs;
 
 namespace BLL.ServiceAbstraction
@@ -27,10 +28,11 @@ namespace BLL.ServiceAbstraction
         Task<List<AdvisorAvailabilityDTO>> GetAvailableSlotsByTypeAsync(int advisorId, DateTime date, ConsultationType consultationType);
 
         // Consultation Requests
-        Task<List<AdvisorRequestDTO>> GetAdvisorRequestsAsync(int advisorId);
+        Task<List<GetAdvisorRequestDTO>> GetAdvisorRequestsAsync(int advisorId);
         Task<AdvisorRequestDTO> UpdateRequestStatusAsync(int requestId, ConsultationStatus status);
 
         // Statistics
         Task<object> GetAdvisorStatisticsAsync(int advisorId);
+        Task<int> GetAdvisorsCountAsync();
     }
 }

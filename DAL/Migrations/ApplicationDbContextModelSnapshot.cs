@@ -574,21 +574,10 @@ namespace DAL.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("DownloadCount")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Duration")
-                        .HasColumnType("int");
 
                     b.Property<bool>("IsPublished")
                         .HasColumnType("bit");
@@ -596,30 +585,13 @@ namespace DAL.Migrations
                     b.Property<DateTime?>("PublishedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Speaker")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
-
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("ThumbnailUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -629,16 +601,11 @@ namespace DAL.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("ViewCount")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("ConsultationId");
-
-                    b.HasIndex("CreatedBy");
 
                     b.ToTable("Lectures");
                 });
@@ -1149,20 +1116,9 @@ namespace DAL.Migrations
                         .WithMany("CreatedLectures")
                         .HasForeignKey("ApplicationUserId");
 
-                    b.HasOne("DAL.Data.Models.Consultation", "Consultation")
+                    b.HasOne("DAL.Data.Models.Consultation", null)
                         .WithMany("Lectures")
-                        .HasForeignKey("ConsultationId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("DAL.Data.Models.IdentityModels.ApplicationUser", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Consultation");
-
-                    b.Navigation("CreatedByUser");
+                        .HasForeignKey("ConsultationId");
                 });
 
             modelBuilder.Entity("DAL.Data.Models.ReconcileRequest", b =>

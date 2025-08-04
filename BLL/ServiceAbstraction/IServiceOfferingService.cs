@@ -11,5 +11,6 @@ namespace BLL.ServiceAbstraction
         Task<ServiceOfferingDTO> UpdateServiceAsync(int id, UpdateServiceOfferingDTO updateServiceDto);
         Task<bool> DeleteServiceAsync(int id);
         Task<bool> IncrementClickCountAsync(int id);
+        Task<int> GetTotalServicesCountAsync();
     }
 } 

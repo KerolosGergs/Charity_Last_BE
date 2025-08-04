@@ -9,5 +9,6 @@ namespace DAL.Repositories.RepositoryIntrfaces
         Task AddAsync(Notification notification);
         Task<List<Notification>> GetUserNotificationsAsync(string userId, bool onlyUnread = false);
         Task MarkAsReadAsync(int notificationId);
+        Task DeleteAsync(int notificationId);
     }
 } 

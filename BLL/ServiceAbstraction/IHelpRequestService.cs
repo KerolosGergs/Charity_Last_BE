@@ -8,5 +8,6 @@ namespace BLL.ServiceAbstraction
     {
         Task<List<HelpRequestDTO>> GetAllAsync();
         Task<HelpRequestDTO> CreateAsync(CreateHelpRequestDTO dto);
+        Task<bool> DeleteAsync(int id);
     }
 } 

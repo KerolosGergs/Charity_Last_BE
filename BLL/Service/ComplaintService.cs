@@ -32,7 +32,7 @@ namespace BLL.Service
 
         public async Task<List<ComplaintDTO>> GetAllComplaintsAsync()
         {
-            var complaints = await _complaintRepository.GetAllAsync();
+            var complaints = await _complaintRepository.GetAllComplaintsWithUserAsync();
             return _mapper.Map<List<ComplaintDTO>>(complaints);
         }
 
@@ -59,8 +59,8 @@ namespace BLL.Service
                 Message = $"تم تقديم شكوى جديدة بعنوان: {complaint.Title}",
                 Type = NotificationType.Complaint
             };
-            await _notificationService.AddNotificationAsync(notification);
-            await _emailService.SendEmailAsync(adminEmail, notification.Title, notification.Message);
+            //await _notificationService.AddNotificationAsync(notification);
+            //await _emailService.SendEmailAsync(adminEmail, notification.Title, notification.Message);
 
             return _mapper.Map<ComplaintDTO>(createdComplaint);
         }
@@ -106,7 +106,7 @@ namespace BLL.Service
             if (complaint == null)
                 return false;
 
-            await _complaintRepository.DeleteAsync(complaint);
+            await _complaintRepository.DeleteAsync(id);
             return true;
         }
 
@@ -145,7 +145,7 @@ namespace BLL.Service
         public async Task<object> GetComplaintStatisticsAsync()
         {
             var complaints = await _complaintRepository.GetAllAsync();
-            
+
             return new
             {
                 TotalComplaints = complaints.Count(),
@@ -154,6 +154,10 @@ namespace BLL.Service
                 ResolvedComplaints = complaints.Count(c => c.Status == ComplaintStatus.Resolved),
                 ClosedComplaints = complaints.Count(c => c.Status == ComplaintStatus.Closed)
             };
+        }
+        public async Task<int> GetTotalComplaintsCountAsync()
+        {
+            return await _complaintRepository.CountAsync();
         }
     }
 } 

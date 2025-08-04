@@ -10,5 +10,6 @@ namespace DAL.Repositories.RepositoryIntrfaces
         Task<List<VolunteerApplication>> GetPendingApplicationsAsync();
         Task<List<VolunteerApplication>> GetApprovedApplicationsAsync();
         Task<int> GetApplicationCountByStatusAsync(VolunteerStatus status);
+        Task<VolunteerApplication> GetByIdAsyncWithRelatedData(int userId);
     }
 } 

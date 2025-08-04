@@ -67,8 +67,8 @@ namespace Charity_BE.Controllers
 
         // POST: api/serviceoffering
         [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<ServiceOfferingDTO>>> CreateService([FromBody] CreateServiceOfferingDTO createServiceDto)
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<ServiceOfferingDTO>>> CreateService([FromForm] CreateServiceOfferingDTO createServiceDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<ServiceOfferingDTO>.ErrorResult("Invalid input data", 400, 
@@ -88,8 +88,8 @@ namespace Charity_BE.Controllers
 
         // PUT: api/serviceoffering/{id}
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<ServiceOfferingDTO>>> UpdateService(int id, [FromBody] UpdateServiceOfferingDTO updateServiceDto)
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<ServiceOfferingDTO>>> UpdateService(int id, [FromForm] UpdateServiceOfferingDTO updateServiceDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<ServiceOfferingDTO>.ErrorResult("Invalid input data", 400));
@@ -110,7 +110,7 @@ namespace Charity_BE.Controllers
 
         // DELETE: api/serviceoffering/{id}
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteService(int id)
         {
             try

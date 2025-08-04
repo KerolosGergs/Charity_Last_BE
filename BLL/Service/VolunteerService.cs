@@ -94,10 +94,9 @@ namespace BLL.Service
             await _volunteerApplicationRepository.DeleteAsync(application);
             return true;
         }
-
         public async Task<VolunteerApplicationDTO> ReviewApplicationAsync(int id, string adminId, ReviewVolunteerApplicationDTO reviewDto)
         {
-            var application = await _volunteerApplicationRepository.GetByIdAsync(id);
+            var application = await _volunteerApplicationRepository.GetByIdAsyncWithRelatedData(id);
             if (application == null)
                 return null;
 
@@ -115,7 +114,7 @@ namespace BLL.Service
         public async Task<object> GetVolunteerStatisticsAsync()
         {
             var applications = await _volunteerApplicationRepository.GetAllAsync();
-            
+
             return new
             {
                 TotalApplications = applications.Count(),
@@ -125,5 +124,10 @@ namespace BLL.Service
                 UnderReviewApplications = applications.Count(a => a.Status == VolunteerStatus.UnderReview)
             };
         }
+        public async Task<int> GetTotalApplicationsCountAsync()
+        {
+            return await _volunteerApplicationRepository.CountAsync();
+        }
+
     }
 } 

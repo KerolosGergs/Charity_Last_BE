@@ -19,5 +19,6 @@ namespace BLL.ServiceAbstraction
 
         // Statistics
         Task<object> GetVolunteerStatisticsAsync();
+        Task<int> GetTotalApplicationsCountAsync();
     }
 } 

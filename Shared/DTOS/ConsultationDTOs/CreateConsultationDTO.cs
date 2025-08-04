@@ -12,5 +12,9 @@ namespace Shared.DTOS.ConsultationDTOs
         [Required(ErrorMessage = "Consultation name is required.")]
         [StringLength(100, ErrorMessage = "Consultation name must be less than 100 characters.")]
         public string ConsultationName { get; set; }
+
+        public string Description { get; set; }
+        public bool IsActive { get; set; } = true;
+
     }
 }

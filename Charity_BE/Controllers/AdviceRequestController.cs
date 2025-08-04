@@ -1,10 +1,12 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOS.AdviceRequestDTOs;
 using Shared.DTOS.Common;
 using BLL.ServiceAbstraction;
 using Shared.DTOS.AdvisorDTOs;
 using System.Security.Claims;
+using BLL.Service;
+using Shared.DTOS.NotificationDTOs;
 
 namespace Charity_BE.Controllers
 {
@@ -13,15 +15,20 @@ namespace Charity_BE.Controllers
     public class AdviceRequestController : ControllerBase
     {
         private readonly IAdviceRequestService _adviceRequestService;
-
-        public AdviceRequestController(IAdviceRequestService adviceRequestService)
+        private readonly INotificationService _notificationService;
+        private readonly IAdvisorService _advisorService;
+        private readonly IEmailService _emailService;
+        public AdviceRequestController(IAdviceRequestService adviceRequestService, INotificationService notificationService,IAdvisorService advisorService, IEmailService emailService)
         {
             _adviceRequestService = adviceRequestService;
+            _notificationService = notificationService;
+            _advisorService = advisorService;
+            _emailService = emailService;
         }
 
         // GET: api/advicerequest
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<List<AdviceRequestDTO>>>> GetAllRequests()
         {
             try
@@ -37,7 +44,7 @@ namespace Charity_BE.Controllers
 
         // GET: api/advicerequest/user
         [HttpGet("user")]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<ApiResponse<List<AdviceRequestDTO>>>> GetUserRequests()
         {
             try
@@ -77,7 +84,9 @@ namespace Charity_BE.Controllers
         // POST: api/advicerequest
         [HttpPost]
         //[Authorize]
-        public async Task<ActionResult<ApiResponse<AdviceRequestDTO>>> CreateRequest([FromQuery] string userId,[FromBody] CreateAdviceRequestDTO createRequestDto)
+        public async Task<ActionResult<ApiResponse<AdviceRequestDTO>>> CreateRequest(
+            [FromQuery] string userId,
+            [FromBody] CreateAdviceRequestDTO createRequestDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<AdviceRequestDTO>.ErrorResult("Invalid input data", 400,
@@ -89,6 +98,21 @@ namespace Charity_BE.Controllers
                     return BadRequest(ApiResponse<AdviceRequestDTO>.ErrorResult("User ID is required", 400));
 
                 var request = await _adviceRequestService.CreateRequestAsync(userId, createRequestDto);
+
+
+                if (request.AdvisorId.HasValue)
+                {
+                    var notification = new NotificationCreateDTO
+                    {
+                        UserId = request.AdvisorId.Value.ToString(),
+                        Title = "تم إنشاء طلب جديد",
+                        Message = $"هناك طلب من  {request.UserName} عنوانه: \"{request.Title}\"من النوع {request.ConsultationName}.",
+                        Type = NotificationType.General
+                    };
+
+                    await _notificationService.AddNotificationAsync(notification);
+                }
+
                 return CreatedAtAction(nameof(GetRequestById), new { id = request.Id },
                     ApiResponse<AdviceRequestDTO>.SuccessResult(request, "Request created successfully"));
             }
@@ -98,20 +122,23 @@ namespace Charity_BE.Controllers
             }
         }
 
+
         // PUT: api/advicerequest/{id}
         [HttpPut("{id}")]
-        [Authorize]
-        public async Task<ActionResult<ApiResponse<AdviceRequestDTO>>> UpdateRequest(int id, [FromBody] UpdateAdviceRequestDTO updateRequestDto)
+        //[Authorize]
+        public async Task<ActionResult<ApiResponse<AdviceRequestDTO>>> UpdateRequest(
+             int id,
+             [FromQuery] string userId,
+             [FromBody] UpdateAdviceRequestDTO updateRequestDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<AdviceRequestDTO>.ErrorResult("Invalid input data", 400));
 
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest(ApiResponse<AdviceRequestDTO>.ErrorResult("User ID is required", 400));
+
             try
             {
-                var userId = User.FindFirst("sub")?.Value;
-                if (string.IsNullOrEmpty(userId))
-                    return Unauthorized(ApiResponse<AdviceRequestDTO>.ErrorResult("User not authenticated", 401));
-
                 var request = await _adviceRequestService.UpdateRequestAsync(id, userId, updateRequestDto);
                 if (request == null)
                     return NotFound(ApiResponse<AdviceRequestDTO>.ErrorResult($"Request with ID {id} not found", 404));
@@ -123,19 +150,18 @@ namespace Charity_BE.Controllers
                 return StatusCode(500, ApiResponse<AdviceRequestDTO>.ErrorResult("Failed to update request", 500));
             }
         }
-
         // DELETE: api/advicerequest/{id}
-        [HttpDelete("{id}")]
-        [Authorize]
-        public async Task<ActionResult<ApiResponse<bool>>> CancelRequest(int id)
+        [HttpDelete("{id}/{UserId}")]
+        //[Authorize]
+        public async Task<ActionResult<ApiResponse<bool>>> CancelRequest(int id,string UserId)
         {
             try
             {
-                var userId = User.FindFirst("sub")?.Value;
-                if (string.IsNullOrEmpty(userId))
+                //var userId = User.FindFirst("sub")?.Value;
+                if (string.IsNullOrEmpty(UserId))
                     return Unauthorized(ApiResponse<bool>.ErrorResult("User not authenticated", 401));
 
-                var result = await _adviceRequestService.CancelRequestAsync(id, userId);
+                var result = await _adviceRequestService.CancelRequestAsync(id, UserId);
                 if (!result)
                     return NotFound(ApiResponse<bool>.ErrorResult($"Request with ID {id} not found", 404));
 
@@ -148,19 +174,56 @@ namespace Charity_BE.Controllers
         }
 
         // PUT: api/advicerequest/{id}/confirm
-        [HttpPut("{id}/confirm")]
-        [Authorize(Roles = "Advisor")]
-        public async Task<ActionResult<ApiResponse<AdviceRequestDTO>>> ConfirmRequest(int id)
+       [HttpPut("{id}/confirm")]
+        //[Authorize(Roles = "Advisor")]
+        public async Task<ActionResult<ApiResponse<AdviceRequestDTO>>> ConfirmRequest(int id, [FromQuery] string advisorId)
         {
             try
             {
-                var advisorId = User.FindFirst("sub")?.Value;
                 if (string.IsNullOrEmpty(advisorId))
-                    return Unauthorized(ApiResponse<AdviceRequestDTO>.ErrorResult("Advisor not authenticated", 401));
+                    return BadRequest(ApiResponse<AdviceRequestDTO>.ErrorResult("Advisor ID is required", 400));
 
                 var request = await _adviceRequestService.ConfirmRequestAsync(id, advisorId);
                 if (request == null)
                     return NotFound(ApiResponse<AdviceRequestDTO>.ErrorResult($"Request with ID {id} not found", 404));
+
+                var message = $"قام المستشار {request.AdvisorName} بتأكيد موعد الاستشارة بعنوان \"{request.Title}\"";
+
+                // الحصول على ZoomLink لو الاستشارة Online
+                string zoomLinkText = "";
+                if (request.ConsultationType == ConsultationType.Online)
+                {
+                    var advisor = await _advisorService.GetAdvisorByIdAsync(request.AdvisorId.Value);
+                    if (advisor != null && !string.IsNullOrEmpty(advisor.ZoomRoomUrl))
+                    {
+                        zoomLinkText = $"\nرابط الجلسة عبر Zoom: {advisor.ZoomRoomUrl}";
+                        message += $"\nرابط الجلسة: {advisor.ZoomRoomUrl}";
+                    }
+                }
+
+                var notification = new NotificationCreateDTO
+                {
+                    UserId = request.UserId,
+                    Title = "تأكيد موعد الاستشارة",
+                    Message = message,
+                    Type = NotificationType.General
+                };
+
+                await _notificationService.AddNotificationAsync(notification);
+
+                // إرسال بريد إلكتروني
+                if (!string.IsNullOrEmpty(request.UserName))
+                {
+                    string subject = "تأكيد موعد الاستشارة";
+                    string body = $"<p>{message}</p>";
+
+                    if (!string.IsNullOrEmpty(zoomLinkText))
+                        body += $"<p>{zoomLinkText}</p>";
+
+                    body += "<p>يرجى متابعة لوحة التحكم الخاصة بك للاطلاع على التفاصيل.</p>";
+
+                    await _emailService.SendEmailAsync(request.UserName, subject, body);
+                }
 
                 return Ok(ApiResponse<AdviceRequestDTO>.SuccessResult(request, "Request confirmed successfully"));
             }
@@ -169,24 +232,45 @@ namespace Charity_BE.Controllers
                 return StatusCode(500, ApiResponse<AdviceRequestDTO>.ErrorResult("Failed to confirm request", 500));
             }
         }
-
         // PUT: api/advicerequest/{id}/complete
         [HttpPut("{id}/complete")]
-        [Authorize(Roles = "Advisor")]
-        public async Task<ActionResult<ApiResponse<AdviceRequestDTO>>> CompleteRequest(int id, [FromBody] CompleteRequestDTO completeRequestDto)
+        //[Authorize(Roles = "Advisor")]
+        public async Task<ActionResult<ApiResponse<AdviceRequestDTO>>> CompleteRequest(
+             int id,
+            [FromQuery] string advisorId,
+            [FromBody] CompleteRequestDTO completeRequestDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<AdviceRequestDTO>.ErrorResult("Invalid input data", 400));
 
             try
             {
-                var advisorId = User.FindFirst("sub")?.Value;
                 if (string.IsNullOrEmpty(advisorId))
-                    return Unauthorized(ApiResponse<AdviceRequestDTO>.ErrorResult("Advisor not authenticated", 401));
+                    return BadRequest(ApiResponse<AdviceRequestDTO>.ErrorResult("Advisor ID is required", 400));
 
                 var request = await _adviceRequestService.CompleteRequestAsync(id, advisorId, completeRequestDto);
                 if (request == null)
                     return NotFound(ApiResponse<AdviceRequestDTO>.ErrorResult($"Request with ID {id} not found", 404));
+
+                var message = $"تم الانتهاء من جلسة الاستشارة الخاصة بك بعنوان \"{request.Title}\".\nيرجى إرسال تقييمك عبر مركز الشكاوى والمقترحات.";
+
+                var notification = new NotificationCreateDTO
+                {
+                    UserId = request.UserId,
+                    Title = "تم الانتهاء من الاستشارة",
+                    Message = message,
+                    Type = NotificationType.General
+                };
+
+                await _notificationService.AddNotificationAsync(notification);
+
+                // إرسال بريد إلكتروني
+                if (!string.IsNullOrEmpty(request.UserName))
+                {
+                    string subject = "تم الانتهاء من الاستشارة";
+                    string body = $"<p>{message.Replace("\n", "<br>")}</p><p>نشكر لك للتواصل معنا.</p>";
+                    await _emailService.SendEmailAsync(request.UserName, subject, body);
+                }
 
                 return Ok(ApiResponse<AdviceRequestDTO>.SuccessResult(request, "Request completed successfully"));
             }
@@ -198,7 +282,7 @@ namespace Charity_BE.Controllers
 
         // GET: api/advicerequest/status/{status}
         [HttpGet("status/{status}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<List<AdviceRequestDTO>>>> GetRequestsByStatus(ConsultationStatus status)
         {
             try
@@ -214,7 +298,7 @@ namespace Charity_BE.Controllers
 
         // GET: api/advicerequest/advisor/{advisorId}
         [HttpGet("advisor/{advisorId}")]
-        [Authorize(Roles = "Advisor")]
+        //[Authorize(Roles = "Advisor")]
         public async Task<ActionResult<ApiResponse<List<AdviceRequestDTO>>>> GetRequestsByAdvisor(int advisorId)
         {
             try
@@ -230,7 +314,7 @@ namespace Charity_BE.Controllers
 
         // GET: api/advicerequest/consultation/{consultationId}
         [HttpGet("consultation/{consultationId}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<List<AdviceRequestDTO>>>> GetRequestsByConsultation(int consultationId)
         {
             try
@@ -246,7 +330,7 @@ namespace Charity_BE.Controllers
 
         // GET: api/advicerequest/statistics
         [HttpGet("statistics")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<object>>> GetRequestStatistics()
         {
             try
@@ -259,5 +343,7 @@ namespace Charity_BE.Controllers
                 return StatusCode(500, ApiResponse<object>.ErrorResult("Failed to retrieve statistics", 500));
             }
         }
+        
+       
     }
-} 
+}

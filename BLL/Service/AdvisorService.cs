@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using DAL.Data.Models;
 using DAL.Repositories.RepositoryClasses;
 using BLL.Services.FileService;
+using Shared.DTOS.AdviceRequestDTOs;
 
 namespace BLL.Service
 {
@@ -229,13 +230,14 @@ namespace BLL.Service
             var availability = await _availabilityRepository.GetByIdAsync(id);
             if (availability == null)
                 return false;
-            return await _availabilityRepository.DeleteAsync(availability);
+            return await _availabilityRepository.DeleteAsync(id);
         }
 
-        public async Task<List<AdvisorRequestDTO>> GetAdvisorRequestsAsync(int advisorId)
+        public async Task<List<GetAdvisorRequestDTO>> GetAdvisorRequestsAsync(int advisorId)
         {
             var requests = await _adviceRequestRepository.GetByAdvisorIdAsync(advisorId);
-            return _mapper.Map<List<AdvisorRequestDTO>>(requests);
+
+            return _mapper.Map<List<GetAdvisorRequestDTO>>(requests);
         }
 
         public async Task<AdvisorRequestDTO> UpdateRequestStatusAsync(int requestId, ConsultationStatus status)
@@ -310,13 +312,17 @@ namespace BLL.Service
         public async Task<List<AdvisorAvailabilityDTO>> GetAvailableSlotsByTypeAsync(int advisorId, DateTime date, ConsultationType consultationType)
         {
             var availabilities = await _availabilityRepository.GetAvailableSlotsForDayAsync(advisorId, date);
-            
+
             // تصفية المواعيد حسب نوع التواصل
-            var filteredAvailabilities = availabilities.Where(a => 
-                a.ConsultationType == consultationType || 
+            var filteredAvailabilities = availabilities.Where(a =>
+                a.ConsultationType == consultationType ||
                 a.ConsultationType == ConsultationType.Both).ToList();
-            
+
             return _mapper.Map<List<AdvisorAvailabilityDTO>>(filteredAvailabilities);
+        }
+        public async Task<int> GetAdvisorsCountAsync()
+        {
+            return await _advisorRepository.CountAsync();
         }
     }
 }

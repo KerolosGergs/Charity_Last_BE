@@ -56,10 +56,20 @@ namespace Shared.DTOS.AdminDTOs
     {
         [Required]
         public string Title { get; set; }
-        
+
         [Required]
         public string Message { get; set; }
-        
+
         public List<string> UserIds { get; set; } = new List<string>();
     }
-} 
+    public class DashboardStatisticsDTO
+    {
+        public int ComplaintCount { get; set; }
+        public int ReconcileRequestCount { get; set; }
+        public int VolunteerCount { get; set; }
+        public int AdvisorCount { get; set; }
+        public int LectureCount { get; set; }
+        public int AdviceRequestCount { get; set; }
+        public int ServiceOfferingCount { get; set; }
+    }
+}

@@ -17,5 +17,6 @@ namespace BLL.ServiceAbstraction
         Task<List<AdviceRequestDTO>> GetRequestsByAdvisorAsync(int advisorId);
         Task<List<AdviceRequestDTO>> GetRequestsByConsultationAsync(int consultationId);
         Task<object> GetRequestStatisticsAsync();
+        Task<int> GetTotalRequestsCountAsync();
     }
 } 

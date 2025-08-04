@@ -30,8 +30,17 @@ namespace BLL.Service
         {
             var entity = _mapper.Map<HelpRequest>(dto);
             entity.CreatedAt = System.DateTime.UtcNow;
+
             var created = await _repository.AddAsync(entity);
+            created.HelpType = await _typeRepository.GetByIdAsync(created.HelpTypeId);
+
             return _mapper.Map<HelpRequestDTO>(created);
         }
+        public Task<bool> DeleteAsync(int id)
+        {
+            return _repository.DeleteAsync(id);
+        }
+
+
     }
 } 

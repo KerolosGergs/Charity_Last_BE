@@ -26,5 +26,14 @@ namespace DAL.Repositories.RepositoryClasses
             await _context.SaveChangesAsync();
             return entity;
         }
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var entity = await _context.HelpRequests.FindAsync(id);
+            if (entity == null) return false;
+
+            _context.HelpRequests.Remove(entity);
+            var result = await _context.SaveChangesAsync();
+            return result > 0;
+        }
     }
 } 

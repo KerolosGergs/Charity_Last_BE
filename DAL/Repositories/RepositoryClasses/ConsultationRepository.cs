@@ -40,11 +40,11 @@ namespace DAL.Repositories.RepositoryClasses
                 .CountAsync(ar => ar.ConsultationId == consultationId);
         }
 
-        public async Task<int> GetLectureCountAsync(int consultationId)
-        {
-            return await _context.Lectures
-                .CountAsync(l => l.ConsultationId == consultationId && l.IsPublished);
-        }
+        //public async Task<int> GetLectureCountAsync(int consultationId)
+        //{
+        //    return await _context.Lectures
+        //        .CountAsync(l => l.ConsultationId == consultationId && l.IsPublished);
+        //}
 
         public async Task<IEnumerable<Consultation>> GetAllWithIncludesAsync()
         {

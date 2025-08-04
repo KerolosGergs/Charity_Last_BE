@@ -9,5 +9,6 @@ namespace BLL.ServiceAbstraction
         Task AddNotificationAsync(NotificationCreateDTO notificationDto);
         Task<List<NotificationDTO>> GetUserNotificationsAsync(string userId, bool onlyUnread = false);
         Task MarkAsReadAsync(int notificationId);
+        Task<bool> DeleteNotificationAsync(int notificationId);
     }
 } 

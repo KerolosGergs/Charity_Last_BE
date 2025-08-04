@@ -11,5 +11,6 @@ namespace BLL.ServiceAbstraction
         Task<ReconcileRequestDTO> GetByIdAsync(int id);
         Task<ReconcileRequestDTO> CreateAsync(string userId, CreateReconcileRequestDTO dto);
         Task<bool> DeleteAsync(int id, string userId);
+        Task<int> GetAllRequestsCount();
     }
 } 

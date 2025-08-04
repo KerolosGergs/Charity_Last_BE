@@ -22,7 +22,6 @@ namespace Shared.DTOS.MediationDTOs
         [Required]
         [StringLength(50)]
         public string FullName { get; set; }
-        [StringLength(500)]
         public IFormFile? Image { get; set; }
         [Required]
         [StringLength(20)]

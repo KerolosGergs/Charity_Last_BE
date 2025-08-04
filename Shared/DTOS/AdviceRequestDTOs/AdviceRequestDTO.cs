@@ -8,6 +8,7 @@ namespace Shared.DTOS.AdviceRequestDTOs
         public int Id { get; set; }
         public string UserId { get; set; }
         public string UserName { get; set; }
+        public string FullName { get; set; }
         public int? AdvisorId { get; set; }
         public string AdvisorName { get; set; }
         public int ConsultationId { get; set; }
@@ -24,7 +25,25 @@ namespace Shared.DTOS.AdviceRequestDTOs
         public string Review { get; set; }
         public ConsultationType ConsultationType { get; set; }
     }
+    public class GetAdvisorRequestDTO
+    {
+        public int Id { get; set; }
+        public string UserId { get; set; }
+        public string UserFullName { get; set; }
+        public string UserEmail { get; set; }
+        public int AdvisorId { get; set; }
+        public string AdvisorFullName { get; set; }
+        public int ConsultationId { get; set; }
+        public string ConsultationName { get; set; }
+        public DateTime Date { get; set; }
+        public TimeSpan Time { get; set; }
+        public TimeSpan Duration { get; set; }
+        public string? Notes { get; set; }
+        public string Status { get; set; }
+        public ConsultationType ConsultationType { get; set; }
 
+
+    }
     public class CreateAdviceRequestDTO
     {
         [Required]
@@ -56,8 +75,11 @@ namespace Shared.DTOS.AdviceRequestDTOs
         public string Description { get; set; }
 
         public string Priority { get; set; }
-        
+
         public ConsultationType? ConsultationType { get; set; }
+        public int? AdvisorAvailabilityId { get; set; }
+        public string Status { get; set; }
+
     }
 
     public class CompleteRequestDTO

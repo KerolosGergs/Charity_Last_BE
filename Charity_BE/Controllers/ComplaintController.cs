@@ -1,8 +1,12 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOS.ComplaintDTOs;
 using Shared.DTOS.Common;
 using BLL.ServiceAbstraction;
+using Microsoft.AspNetCore.Identity;
+using Shared.DTOS.NotificationDTOs;
+using DAL.Data.Models;
+using BLL.Service;
 
 namespace Charity_BE.Controllers
 {
@@ -11,10 +15,19 @@ namespace Charity_BE.Controllers
     public class ComplaintController : ControllerBase
     {
         private readonly IComplaintService _complaintService;
+        IAdminService _adminService;
+        INotificationService _notificationService;
+        IUserService _userService;
+        private readonly IEmailService _emailService;
 
-        public ComplaintController(IComplaintService complaintService)
+
+        public ComplaintController(IComplaintService complaintService, IAdminService adminService, INotificationService notificationService, IUserService userService, IEmailService emailService)
         {
+            _userService = userService;
             _complaintService = complaintService;
+            _adminService = adminService;
+            _notificationService = notificationService;
+            _emailService = emailService;
         }
 
         // GET: api/complaint
@@ -29,7 +42,7 @@ namespace Charity_BE.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ApiResponse<List<ComplaintDTO>>.ErrorResult(ex.Message, 500));
+                return StatusCode(500, ApiResponse<List<ComplaintDTO>>.ErrorResult("Failed to retrieve complaints", 500));
             }
         }
 
@@ -53,33 +66,49 @@ namespace Charity_BE.Controllers
             }
         }
 
-        // POST: api/complaint
         [HttpPost]
-        [Authorize]
-        public async Task<ActionResult<ApiResponse<ComplaintDTO>>> CreateComplaint([FromBody] CreateComplaintDTO createComplaintDto)
+        public async Task<ActionResult<ApiResponse<ComplaintDTO>>> Create(
+              [FromQuery] string userId,
+              [FromBody] CreateComplaintDTO dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<ComplaintDTO>.ErrorResult("Invalid input data", 400, 
+                return BadRequest(ApiResponse<ComplaintDTO>.ErrorResult("Invalid input data", 400,
                     ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()));
 
-            try
-            {
-                var userId = User.FindFirst("sub")?.Value;
-                if (string.IsNullOrEmpty(userId))
-                    return Unauthorized(ApiResponse<ComplaintDTO>.ErrorResult("User not authenticated", 401));
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest(ApiResponse<ComplaintDTO>.ErrorResult("User ID is required", 400));
 
-                var complaint = await _complaintService.CreateComplaintAsync(userId, createComplaintDto);
-                return Ok(ApiResponse<ComplaintDTO>.SuccessResult(complaint, "Complaint created successfully"));
-            }
-            catch (Exception ex)
+            var createdComplaint = await _complaintService.CreateComplaintAsync(userId, dto);
+
+            var user = await _userService.GetUserByIdAsync(userId);
+            var userName = user.FullName;
+
+            var admins = await _adminService.GetAllAdminsAsync();
+            foreach (var admin in admins)
             {
-                return StatusCode(500, ApiResponse<ComplaintDTO>.ErrorResult("Failed to create complaint", 500));
+                var notification = new NotificationCreateDTO
+                {
+                    UserId = admin.UserId,
+                    Title = "شكوى جديدة",
+                    Message = $"قام المستخدم {userName} بتقديم شكوى جديدة. يرجى مراجعتها.",
+                    Type = NotificationType.General
+                };
+                await _notificationService.AddNotificationAsync(notification);
+
+                // إرسال بريد إلكتروني
+                if (!string.IsNullOrEmpty(admin.Email))
+                {
+                    string subject = "شكوى جديدة من أحد المستخدمين";
+                    string body = $"<p>قام المستخدم <b>{userName}</b> بتقديم شكوى جديدة.</p><p>يرجى مراجعتها من خلال لوحة التحكم.</p>";
+                    await _emailService.SendEmailAsync(admin.Email, subject, body);
+                }
             }
+
+            return Ok(ApiResponse<ComplaintDTO>.SuccessResult(createdComplaint, "Complaint created successfully"));
         }
-
         // PUT: api/complaint/{id}
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<ComplaintDTO>>> UpdateComplaint(int id, [FromBody] UpdateComplaintDTO updateComplaintDto)
         {
             if (!ModelState.IsValid)
@@ -101,7 +130,7 @@ namespace Charity_BE.Controllers
 
         // DELETE: api/complaint/{id}
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteComplaint(int id)
         {
             try
@@ -120,7 +149,7 @@ namespace Charity_BE.Controllers
 
         // PUT: api/complaint/{id}/status
         [HttpPut("{id}/status")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<ComplaintDTO>>> UpdateComplaintStatus(int id, [FromBody] ComplaintStatus status)
         {
             try
@@ -139,7 +168,7 @@ namespace Charity_BE.Controllers
 
         // GET: api/complaint/statistics
         [HttpGet("statistics")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<object>>> GetComplaintStatistics()
         {
             try
@@ -153,4 +182,4 @@ namespace Charity_BE.Controllers
             }
         }
     }
-} 
+}

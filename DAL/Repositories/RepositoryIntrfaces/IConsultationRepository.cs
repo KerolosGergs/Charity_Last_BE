@@ -16,6 +16,6 @@ namespace DAL.Repositories.RepositoryIntrfaces
         Task<Consultation> GetByNameAsync(string name);
         Task<int> GetAdvisorCountAsync(int consultationId);
         Task<int> GetRequestCountAsync(int consultationId);
-        Task<int> GetLectureCountAsync(int consultationId);
+        //Task<int> GetLectureCountAsync(int consultationId);
     }
 }

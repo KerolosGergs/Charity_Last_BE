@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Shared.DTOS.AdvisorDTOs;
 using Shared.DTOS.Common;
 using BLL.ServiceAbstraction;
+using Shared.DTOS.AdviceRequestDTOs;
 
 namespace Charity_BE.Controllers
 {
@@ -217,12 +218,12 @@ namespace Charity_BE.Controllers
         // GET: api/advisor/{id}/requests
         [HttpGet("{id}/requests")]
         //[Authorize(Roles = "Advisor")]
-        public async Task<ActionResult<ApiResponse<List<AdvisorRequestDTO>>>> GetAdvisorRequests(int id)
+        public async Task<ActionResult<ApiResponse<List<GetAdvisorRequestDTO>>>> GetAdvisorRequests(int id)
         {
             try
             {
                 var requests = await _advisorService.GetAdvisorRequestsAsync(id);
-                return Ok(ApiResponse<List<AdvisorRequestDTO>>.SuccessResult(requests));
+                return Ok(ApiResponse<List<GetAdvisorRequestDTO>>.SuccessResult(requests));
             }
             catch (Exception ex)
             {

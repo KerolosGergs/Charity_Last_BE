@@ -39,5 +39,14 @@ namespace DAL.Repositories.RepositoryClasses
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task DeleteAsync(int notificationId)
+        {
+            var notification = await _context.Notifications.FindAsync(notificationId);
+            if (notification != null)
+            {
+                _context.Notifications.Remove(notification);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 } 

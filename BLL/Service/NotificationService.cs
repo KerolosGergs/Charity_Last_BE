@@ -34,5 +34,17 @@ namespace BLL.Service
         {
             await _notificationRepository.MarkAsReadAsync(notificationId);
         }
+        public async Task<bool> DeleteNotificationAsync(int notificationId)
+        {
+            try
+            {
+                await _notificationRepository.DeleteAsync(notificationId);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 } 

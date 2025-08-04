@@ -67,8 +67,8 @@ namespace Charity_BE.Controllers
 
         // POST: api/consultation
         [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<ConsultationDTO>>> CreateConsultation([FromBody] CreateConsultationDTO createConsultationDto)
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<ConsultationDTO>>> CreateConsultation([FromForm] CreateConsultationDTO createConsultationDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<ConsultationDTO>.ErrorResult("Invalid input data", 400, 
@@ -92,8 +92,8 @@ namespace Charity_BE.Controllers
 
         // PUT: api/consultation/{id}
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<ConsultationDTO>>> UpdateConsultation(int id, [FromBody] UpdateConsultationDTO updateConsultationDto)
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<ConsultationDTO>>> UpdateConsultation(int id, [FromForm] UpdateConsultationDTO updateConsultationDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<ConsultationDTO>.ErrorResult("Invalid input data", 400));
@@ -118,10 +118,11 @@ namespace Charity_BE.Controllers
 
         // DELETE: api/consultation/{id}
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteConsultation(int id)
         {
             try
+                
             {
                 var result = await _consultationService.DeleteConsultationAsync(id);
                 if (!result)
