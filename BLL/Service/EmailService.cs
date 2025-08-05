@@ -38,4 +38,4 @@ namespace BLL.Service
             await smtpClient.SendMailAsync(mailMessage);
         }
     }
-} 
+}
