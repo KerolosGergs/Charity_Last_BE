@@ -129,5 +129,46 @@ namespace Charity_BE.Controllers
                 return StatusCode(500, ApiResponse<CurrentUserDTO>.ErrorResult("Failed to get current user", 500));
             }
         }
+        // POST: api/authentication/forgot-password
+        [HttpPost("forgot-password")]
+        public async Task<ActionResult<ApiResponse<string>>> ForgotPassword([FromBody] forgotPasswordDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<string>.ErrorResult("Invalid input data", 400,
+                    ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()));
+
+            try
+            {
+                await _authService.ForgotPasswordAsync(dto.Email);
+                return Ok(ApiResponse<string>.SuccessResult("If your email is registered, you will receive a password reset link."));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<string>.ErrorResult("Failed to process password reset request", 500));
+            }
+        }
+
+        // POST: api/authentication/reset-password?token=...
+        [HttpPost("reset-password")]
+        public async Task<ActionResult<ApiResponse<string>>> ResetPassword([FromBody] ResetPasswordDTO dto, [FromQuery] string token)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<string>.ErrorResult("Invalid input data", 400,
+                    ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()));
+
+            try
+            {
+                var result = await _authService.ResetPasswordAsync(dto, token);
+                if (!result)
+                    return BadRequest(ApiResponse<string>.ErrorResult("Invalid token or email", 400));
+
+                return Ok(ApiResponse<string>.SuccessResult("Password has been reset successfully."));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<string>.ErrorResult("Failed to reset password", 500));
+            }
+        }
+
     }
 }

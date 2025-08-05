@@ -12,6 +12,7 @@ using DAL.Repositories.RepositoryIntrfaces;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using System.Data;
+using System.Net;
 
 namespace BLL.Service
 {
@@ -23,6 +24,7 @@ namespace BLL.Service
         private readonly IConfiguration _configuration;
         private readonly IAdminRepository _adminRepository;
         private readonly IAdvisorRepository _advisorRepository;
+        private readonly IEmailService _emailService;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
@@ -30,7 +32,8 @@ namespace BLL.Service
             IMapper mapper,
             IConfiguration configuration,
             IAdminRepository adminRepository,
-            IAdvisorRepository advisorRepository
+            IAdvisorRepository advisorRepository,
+            IEmailService emailService
         )
         {
             _userManager = userManager;
@@ -39,6 +42,7 @@ namespace BLL.Service
             _configuration = configuration;
             _adminRepository = adminRepository;
             _advisorRepository = advisorRepository;
+            _emailService = emailService;
         }
 
         public async Task<bool> IsEmailExistAsync(string email)
@@ -213,8 +217,6 @@ namespace BLL.Service
         public async Task<AuthResponseDTO> LoginAsync(LoginDTO dto)
         {
             var normalizedEmail = dto.Email?.Trim().ToUpperInvariant();
-
-            // لازم Include للـ Navigation Properties علشان نجيب RoleId
             var user = await _userManager.Users
                 .Include(u => u.Advisor)
                 .Include(u => u.Admin)
@@ -230,8 +232,6 @@ namespace BLL.Service
 
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault() ?? "User";
-
-            // استخراج RoleId حسب نوع الدور
             int? roleId = role switch
             {
                 "Advisor" => user.Advisor?.Id,
@@ -279,6 +279,37 @@ namespace BLL.Service
                 Role = roles.ToList(),
                 IsActive = user.IsActive
             };
+        }
+        public async Task<bool> ForgotPasswordAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return true;
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var resetLink = $"{_configuration["FrontendUrl"]}/reset-password?email={WebUtility.UrlEncode(email)}&token={WebUtility.UrlEncode(token)}";
+
+            string subject = "طلب إعادة تعيين كلمة المرور";
+            string body = $@"
+                <p>مرحباً {user.FullName},</p>
+                <p>لقد تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بك. اضغط على الرابط أدناه لتعيين كلمة مرور جديدة:</p>
+                <p><a href='{resetLink}'>إعادة تعيين كلمة المرور</a></p>
+                <p>إذا لم تطلب هذا، يرجى تجاهل هذا البريد.</p>";
+            await _emailService.SendEmailAsync(email, subject, body);
+            return true;
+        }
+
+        public async Task<bool> ResetPasswordAsync(ResetPasswordDTO dto, string token)
+        {
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null)
+            {
+                return false;
+            }
+            var resetPassResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
+            return resetPassResult.Succeeded;
         }
     }
 }

@@ -16,5 +16,7 @@ namespace BLL.ServiceAbstraction
         Task<AuthResponseDTO> RegisterAdvisorAsync(RegisterAdvisorDTO registerDto);
         Task<CurrentUserDTO> GetCurrentUserAsync(string userId);
         Task<bool> IsEmailExistAsync(string email);
+        Task<bool> ForgotPasswordAsync(string email);
+        Task<bool> ResetPasswordAsync(ResetPasswordDTO dto, string token);
     }
 }
