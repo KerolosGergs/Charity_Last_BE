@@ -16,6 +16,8 @@ using Shared.DTOS.NotificationDTOs;
 using Shared.DTOS.MediationDTOs;
 using Shared.DTOS.HelpDTOs;
 using Shared.DTOS.ReconcileRequestDTOs;
+using Shared.DTOS.ImageLibraryDTOs;
+using Shared.DTOS.VideosLibraryDTOs;
 
 namespace BLL.Mapping
 {
@@ -167,6 +169,17 @@ namespace BLL.Mapping
                     src.Advisor.Availabilities.FirstOrDefault(a => a.Id == src.AdvisorAvailabilityId)!.Duration))
                 .ForMember(dest => dest.Notes, opt => opt.MapFrom(src =>
                     src.Advisor.Availabilities.FirstOrDefault(a => a.Id == src.AdvisorAvailabilityId)!.Notes));
+
+            //ImageLibrary
+            CreateMap<ImagesLibrary, ImageLibraryDTO>();
+            CreateMap<CreateImageLibraryDTO, ImagesLibrary>();
+            CreateMap<UpdateImageLibraryDTO, ImagesLibrary>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            //VideoLibrary
+            CreateMap<VideosLibrary, VideosLibraryDTO>();
+            CreateMap<CreateVideosLibraryDTO, VideosLibrary>();
+            CreateMap<UpdateVideosLibraryDTO, VideosLibrary>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }
 
         private static List<string> DeserializeTags(string tags)

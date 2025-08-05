@@ -32,6 +32,8 @@ namespace DAL.Data
         public DbSet<HelpRequest> HelpRequests { get; set; }
         public DbSet<ReconcileRequest> ReconcileRequests { get; set; }
         public DbSet<Mediation> Mediations { get; set; }
+        public DbSet<ImagesLibrary> ImagesLibrary { get; set; }
+        public DbSet<VideosLibrary> VideosLibraries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
