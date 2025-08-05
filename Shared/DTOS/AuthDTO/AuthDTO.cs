@@ -126,4 +126,22 @@ namespace Shared.DTOS.AuthDTO
         public string Address { get; set; }
         public bool IsActive { get; set; }
     }
+    public class forgotPasswordDTO
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+    }
+    public class ResetPasswordDTO
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+        [Required]
+        [StringLength(100, MinimumLength = 6)]
+        public string Password { get; set; }
+        [Required]
+        [Compare("Password")]
+        public string ConfirmPassword { get; set; }
+    }
 } 

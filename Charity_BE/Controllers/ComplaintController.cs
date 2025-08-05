@@ -45,7 +45,6 @@ namespace Charity_BE.Controllers
                 return StatusCode(500, ApiResponse<List<ComplaintDTO>>.ErrorResult("Failed to retrieve complaints", 500));
             }
         }
-
         // GET: api/complaint/user
         [HttpGet("user")]
         //[Authorize]
@@ -65,7 +64,6 @@ namespace Charity_BE.Controllers
                 return StatusCode(500, ApiResponse<List<ComplaintDTO>>.ErrorResult("Failed to retrieve complaints", 500));
             }
         }
-
         [HttpPost]
         public async Task<ActionResult<ApiResponse<ComplaintDTO>>> Create(
               [FromQuery] string userId,

@@ -113,6 +113,8 @@ namespace Charity_BE
             builder.Services.AddScoped<IHelpRequestService, HelpRequestService>();
             builder.Services.AddScoped<IReconcileRequestService, ReconcileRequestService>();
             builder.Services.AddScoped<IAdminDashboardCount, AdminDashboardCount>();
+            builder.Services.AddScoped<IImagesLibraryRepository, ImageLibraryRepository>();
+            builder.Services.AddScoped<IVideosLibraryRepository, VideosLibraryRepository>();
 
             // Service Registrations
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -128,6 +130,8 @@ namespace Charity_BE
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IImageLibraryService, ImageLibraryService>();
+            builder.Services.AddScoped<IVideosLibraryService, VideosLibraryService>();
             // Data Seed
             builder.Services.AddScoped<DataSeed>();
 
