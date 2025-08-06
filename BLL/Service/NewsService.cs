@@ -12,12 +12,14 @@ namespace BLL.Service
         private readonly INewsItemRepository _newsItemRepository;
         private readonly INewsImageRepository _newsImageRepository;
         private readonly IMapper _mapper;
+        private readonly IFileService _fileService;
 
-        public NewsService(INewsItemRepository newsItemRepository, INewsImageRepository newsImageRepository, IMapper mapper)
+        public NewsService(INewsItemRepository newsItemRepository, INewsImageRepository newsImageRepository, IMapper mapper, IFileService fileService)
         {
             _newsItemRepository = newsItemRepository;
             _newsImageRepository = newsImageRepository;
             _mapper = mapper;
+            _fileService = fileService;
         }
 
         public async Task<List<NewsItemDTO>> GetAllNewsAsync()
@@ -47,12 +49,10 @@ namespace BLL.Service
             if (news.IsPublished)
                 news.PublishedAt = DateTime.UtcNow;
 
-            FileService fs = new FileService();
-
             // Handle single image (backward compatibility)
             if (createNewsDto.Image != null)
             {
-                var imgUrl = await fs.UploadFileAsync(createNewsDto.Image, fs._newsFileName);
+                var imgUrl = await _fileService.UploadFileAsync(createNewsDto.Image, "newsImage");
                 news.ImageUrl = imgUrl;
             }
 
@@ -66,7 +66,7 @@ namespace BLL.Service
                 {
                     if (imageFile != null)
                     {
-                        var imageUrl = await fs.UploadFileAsync(imageFile, fs._newsFileName);
+                        var imageUrl = await _fileService.UploadFileAsync(imageFile, "newsImage");
                         var newsImage = new NewsImage
                         {
                             ImageUrl = imageUrl,
@@ -113,16 +113,14 @@ namespace BLL.Service
 
             news.UpdatedAt = DateTime.UtcNow;
 
-            FileService fs = new FileService();
-
             // Handle single image update (backward compatibility)
             if (updateNewsDto.Image != null)
             {
                 // Delete old single image if exists
                 if (!string.IsNullOrEmpty(news.ImageUrl))
-                    fs.DeleteFile(news.ImageUrl);
+                    _fileService.DeleteFile(news.ImageUrl);
 
-                var imgUrl = await fs.UploadFileAsync(updateNewsDto.Image, fs._newsFileName);
+                var imgUrl = await _fileService.UploadFileAsync(updateNewsDto.Image, "newsImage");
                 news.ImageUrl = imgUrl;
             }
 
@@ -134,7 +132,7 @@ namespace BLL.Service
                     var imageToDelete = await _newsImageRepository.GetByImageUrlAsync(imageUrl);
                     if (imageToDelete != null)
                     {
-                        fs.DeleteFile(imageUrl);
+                        _fileService.DeleteFile(imageUrl);
                         await _newsImageRepository.DeleteAsync(imageToDelete.Id);
                     }
                 }
@@ -147,7 +145,7 @@ namespace BLL.Service
                 {
                     if (imageFile != null)
                     {
-                        var imageUrl = await fs.UploadFileAsync(imageFile, fs._newsFileName);
+                        var imageUrl = await _fileService.UploadFileAsync(imageFile, "newsImage");
                         var newsImage = new NewsImage
                         {
                             ImageUrl = imageUrl,
@@ -171,16 +169,14 @@ namespace BLL.Service
             if (news == null)
                 return false;
 
-            FileService fs = new FileService();
-
             // Delete single image if exists
             if (!string.IsNullOrEmpty(news.ImageUrl))
-                fs.DeleteFile(news.ImageUrl);
+                _fileService.DeleteFile(news.ImageUrl);
 
             // Delete all associated images
             foreach (var image in news.Images)
             {
-                fs.DeleteFile(image.ImageUrl);
+                _fileService.DeleteFile(image.ImageUrl);
             }
 
             await _newsItemRepository.DeleteAsync(id);
@@ -234,8 +230,7 @@ namespace BLL.Service
             if (image == null || image.NewsItemId != newsId)
                 return false;
 
-            FileService fs = new FileService();
-            fs.DeleteFile(imageUrl);
+            _fileService.DeleteFile(imageUrl);
             await _newsImageRepository.DeleteAsync(image.Id);
             return true;
         }

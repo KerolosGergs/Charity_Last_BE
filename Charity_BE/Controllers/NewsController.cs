@@ -14,10 +14,12 @@ namespace Charity_BE.Controllers
     public class NewsController : ControllerBase
     {
         private readonly INewsService _newsService;
+        private readonly IFileService _fileService;
 
-        public NewsController(INewsService newsService)
+        public NewsController(INewsService newsService, IFileService fileService)
         {
             _newsService = newsService;
+            _fileService = fileService;
         }
 
         // GET: api/news
@@ -187,16 +189,15 @@ namespace Charity_BE.Controllers
         // POST: api/news/{id}/images
         [HttpPost("{id}/images")]
         //[Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<bool>>> AddImageToNews(int id, [FromForm] IFormFile image)
+        public async Task<ActionResult<ApiResponse<bool>>> AddImageToNews(int id, [FromForm] AddImageToNewsDTO dto)
         {
             try
             {
-                if (image == null)
+                if (dto.Image == null)
                     return BadRequest(ApiResponse<bool>.ErrorResult("Image file is required", 400));
 
-                // You'll need to upload the image first using FileService
-                var fileService = new FileService();
-                var imageUrl = await fileService.UploadFileAsync(image, fileService._newsFileName);
+                // Upload the image using FileService
+                var imageUrl = await _fileService.UploadFileAsync(dto.Image, "newsImage");
 
                 var result = await _newsService.AddImageToNewsAsync(id, imageUrl);
                 if (!result)
