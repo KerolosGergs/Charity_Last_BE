@@ -18,6 +18,8 @@ using Shared.DTOS.HelpDTOs;
 using Shared.DTOS.ReconcileRequestDTOs;
 using Shared.DTOS.ImageLibraryDTOs;
 using Shared.DTOS.VideosLibraryDTOs;
+using DAL.Data.Models.HomePage;
+using Shared.DTOS.HomePageDTOS;
 
 namespace BLL.Mapping
 {
@@ -179,6 +181,19 @@ namespace BLL.Mapping
             CreateMap<VideosLibrary, VideosLibraryDTO>();
             CreateMap<CreateVideosLibraryDTO, VideosLibrary>();
             CreateMap<UpdateVideosLibraryDTO, VideosLibrary>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            // HeroSection Mapping
+            CreateMap<HeroSection, HeroSectionDTOs>();
+            CreateMap<UpdateHeroSectionDTO, HeroSection>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            // HomeVideoSection Mapping
+            CreateMap<HomeVideoSection, HomeVideoSectionDTO>();
+            CreateMap<UpdateHomeVideoSectionDTO, HomeVideoSection>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            //TrendSection Mapping
+            CreateMap<TrendSection, TrendSectionDTO>();
+            CreateMap<UpdateTrendSectionDTO, TrendSection>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }
 

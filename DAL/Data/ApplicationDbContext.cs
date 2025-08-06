@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DAL.Data.Models;
+using DAL.Data.Models.HomePage;
 using DAL.Data.Models.IdentityModels;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,9 @@ namespace DAL.Data
         public DbSet<Mediation> Mediations { get; set; }
         public DbSet<ImagesLibrary> ImagesLibrary { get; set; }
         public DbSet<VideosLibrary> VideosLibraries { get; set; }
+        public DbSet<HeroSection> HeroSections { get; set; }
+        public DbSet<HomeVideoSection>  HomeVideoSections { get; set; }
+        public DbSet<TrendSection> TrendSections { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
