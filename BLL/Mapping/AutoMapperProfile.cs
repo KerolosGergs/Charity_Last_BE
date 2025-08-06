@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using DAL.Data.Models;
 using DAL.Data.Models.IdentityModels;
 using Shared.DTOS.AdminDTOs;
@@ -99,11 +99,37 @@ namespace BLL.Mapping
             CreateMap<UpdateLectureDTO, Lecture>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            // News Item Mappings
-            CreateMap<NewsItem, NewsItemDTO>();
-            CreateMap<CreateNewsItemDTO, NewsItem>();
+            CreateMap<NewsItem, NewsItemDTO>()
+                            .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src =>
+                                src.Images != null ? src.Images.Select(img => img.ImageUrl).ToList() : new List<string>()));
+
+
+            CreateMap<CreateNewsItemDTO, NewsItem>()
+                 .ForMember(dest => dest.Id, opt => opt.Ignore())
+                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                 .ForMember(dest => dest.PublishedAt, opt => opt.Ignore())
+                 .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+                 .ForMember(dest => dest.ViewCount, opt => opt.Ignore())
+                 .ForMember(dest => dest.Images, opt => opt.Ignore())
+                 .ForMember(dest => dest.ImageUrl, opt => opt.Ignore());
+
+
             CreateMap<UpdateNewsItemDTO, NewsItem>()
-                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.PublishedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.ViewCount, opt => opt.Ignore())
+                .ForMember(dest => dest.Author, opt => opt.Ignore())
+                .ForMember(dest => dest.Images, opt => opt.Ignore())
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
+
+            CreateMap<NewsImage, NewsImageDTO>();
+
+            CreateMap<NewsImageDTO, NewsImage>()
+                .ForMember(dest => dest.NewsItem, opt => opt.Ignore());
 
             // Service Offering Mappings
             CreateMap<ServiceOffering, ServiceOfferingDTO>();

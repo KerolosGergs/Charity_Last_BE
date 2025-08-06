@@ -5,6 +5,7 @@ using Shared.DTOS.Common;
 using BLL.ServiceAbstraction;
 using Shared.DTOS.ServiceOfferingDTOs;
 using System.Security.Claims;
+using BLL.Services.FileService;
 
 namespace Charity_BE.Controllers
 {
@@ -69,7 +70,7 @@ namespace Charity_BE.Controllers
 
         // POST: api/news
         [HttpPost]
-        //[Authorize(Roles = "Admin")]ذ
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<NewsItemDTO>>> CreateNews([FromForm] CreateNewsItemDTO createNewsDto, [FromQuery] string adminId)
         {
             if (!ModelState.IsValid)
@@ -165,144 +166,69 @@ namespace Charity_BE.Controllers
                 return StatusCode(500, ApiResponse<object>.ErrorResult("Failed to retrieve statistics", 500));
             }
         }
-    }
 
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ServiceController : ControllerBase
-    {
-        private readonly IServiceOfferingService _serviceOfferingService;
+        // NEW ENDPOINTS FOR IMAGE MANAGEMENT
 
-        public ServiceController(IServiceOfferingService serviceOfferingService)
-        {
-            _serviceOfferingService = serviceOfferingService;
-        }
-
-        // GET: api/service
-        [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<ServiceOfferingDTO>>>> GetAllServices()
+        // GET: api/news/{id}/images
+        [HttpGet("{id}/images")]
+        public async Task<ActionResult<ApiResponse<List<NewsImageDTO>>>> GetNewsImages(int id)
         {
             try
             {
-                var services = await _serviceOfferingService.GetAllServicesAsync();
-                return Ok(ApiResponse<List<ServiceOfferingDTO>>.SuccessResult(services));
+                var images = await _newsService.GetNewsImagesAsync(id);
+                return Ok(ApiResponse<List<NewsImageDTO>>.SuccessResult(images));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ApiResponse<List<ServiceOfferingDTO>>.ErrorResult("Failed to retrieve services", 500));
+                return StatusCode(500, ApiResponse<List<NewsImageDTO>>.ErrorResult("Failed to retrieve news images", 500));
             }
         }
 
-        // GET: api/service/active
-        [HttpGet("active")]
-        public async Task<ActionResult<ApiResponse<List<ServiceOfferingDTO>>>> GetActiveServices()
+        // POST: api/news/{id}/images
+        [HttpPost("{id}/images")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<bool>>> AddImageToNews(int id, [FromForm] IFormFile image)
         {
             try
             {
-                var services = await _serviceOfferingService.GetActiveServicesAsync();
-                return Ok(ApiResponse<List<ServiceOfferingDTO>>.SuccessResult(services));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ApiResponse<List<ServiceOfferingDTO>>.ErrorResult("Failed to retrieve active services", 500));
-            }
-        }
+                if (image == null)
+                    return BadRequest(ApiResponse<bool>.ErrorResult("Image file is required", 400));
 
-        // GET: api/service/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<ServiceOfferingDTO>>> GetServiceById(int id)
-        {
-            try
-            {
-                var service = await _serviceOfferingService.GetServiceByIdAsync(id);
-                if (service == null)
-                    return NotFound(ApiResponse<ServiceOfferingDTO>.ErrorResult($"Service with ID {id} not found", 404));
+                // You'll need to upload the image first using FileService
+                var fileService = new FileService();
+                var imageUrl = await fileService.UploadFileAsync(image, fileService._newsFileName);
 
-                return Ok(ApiResponse<ServiceOfferingDTO>.SuccessResult(service));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ApiResponse<ServiceOfferingDTO>.ErrorResult("Failed to retrieve service", 500));
-            }
-        }
-
-        // POST: api/service
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<ServiceOfferingDTO>>> CreateService([FromBody] CreateServiceOfferingDTO createServiceDto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<ServiceOfferingDTO>.ErrorResult("Invalid input data", 400, 
-                    ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()));
-
-            try
-            {
-                var service = await _serviceOfferingService.CreateServiceAsync(createServiceDto);
-                return CreatedAtAction(nameof(GetServiceById), new { id = service.Id }, 
-                    ApiResponse<ServiceOfferingDTO>.SuccessResult(service, "Service created successfully"));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ApiResponse<ServiceOfferingDTO>.ErrorResult("Failed to create service", 500));
-            }
-        }
-
-        // PUT: api/service/{id}
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<ServiceOfferingDTO>>> UpdateService(int id, [FromBody] UpdateServiceOfferingDTO updateServiceDto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<ServiceOfferingDTO>.ErrorResult("Invalid input data", 400));
-
-            try
-            {
-                var service = await _serviceOfferingService.UpdateServiceAsync(id, updateServiceDto);
-                if (service == null)
-                    return NotFound(ApiResponse<ServiceOfferingDTO>.ErrorResult($"Service with ID {id} not found", 404));
-
-                return Ok(ApiResponse<ServiceOfferingDTO>.SuccessResult(service, "Service updated successfully"));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ApiResponse<ServiceOfferingDTO>.ErrorResult("Failed to update service", 500));
-            }
-        }
-
-        // DELETE: api/service/{id}
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<bool>>> DeleteService(int id)
-        {
-            try
-            {
-                var result = await _serviceOfferingService.DeleteServiceAsync(id);
+                var result = await _newsService.AddImageToNewsAsync(id, imageUrl);
                 if (!result)
-                    return NotFound(ApiResponse<bool>.ErrorResult($"Service with ID {id} not found", 404));
+                    return NotFound(ApiResponse<bool>.ErrorResult($"News with ID {id} not found", 404));
 
-                return Ok(ApiResponse<bool>.SuccessResult(true, "Service deleted successfully"));
+                return Ok(ApiResponse<bool>.SuccessResult(true, "Image added successfully"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ApiResponse<bool>.ErrorResult("Failed to delete service", 500));
+                return StatusCode(500, ApiResponse<bool>.ErrorResult("Failed to add image", 500));
             }
         }
 
-        // PUT: api/service/{id}/click
-        [HttpPut("{id}/click")]
-        public async Task<ActionResult<ApiResponse<bool>>> IncrementClickCount(int id)
+        // DELETE: api/news/{id}/images
+        [HttpDelete("{id}/images")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<bool>>> RemoveImageFromNews(int id, [FromQuery] string imageUrl)
         {
             try
             {
-                var result = await _serviceOfferingService.IncrementClickCountAsync(id);
-                if (!result)
-                    return NotFound(ApiResponse<bool>.ErrorResult($"Service with ID {id} not found", 404));
+                if (string.IsNullOrEmpty(imageUrl))
+                    return BadRequest(ApiResponse<bool>.ErrorResult("Image URL is required", 400));
 
-                return Ok(ApiResponse<bool>.SuccessResult(true, "Click count incremented"));
+                var result = await _newsService.RemoveImageFromNewsAsync(id, imageUrl);
+                if (!result)
+                    return NotFound(ApiResponse<bool>.ErrorResult("Image not found or doesn't belong to this news", 404));
+
+                return Ok(ApiResponse<bool>.SuccessResult(true, "Image removed successfully"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ApiResponse<bool>.ErrorResult("Failed to increment click count", 500));
+                return StatusCode(500, ApiResponse<bool>.ErrorResult("Failed to remove image", 500));
             }
         }
     }

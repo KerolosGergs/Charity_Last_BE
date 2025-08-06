@@ -118,6 +118,7 @@ namespace Charity_BE
             builder.Services.AddScoped<IHeroSectionRepository, HeroSectionRepository>();
             builder.Services.AddScoped<IHomeVideoSectionRepository, HomeVideoSectionRepository>();
             builder.Services.AddScoped<ITrendSectionRepository, TrendSectionRepository>();
+            builder.Services.AddScoped<INewsImageRepository, NewsImageRepository>();
 
 
             // Service Registrations
