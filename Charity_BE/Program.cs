@@ -16,6 +16,7 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using BLL.Mapping;
 using Microsoft.Extensions.DependencyInjection;
+using BLL.Services.FileService;
 
 namespace Charity_BE
 {
@@ -140,6 +141,10 @@ namespace Charity_BE
             builder.Services.AddScoped<IHeroSectionService, HeroSectionService>();
             builder.Services.AddScoped<IHomeVideoSectionService, HomeVideoSectionService>();
             builder.Services.AddScoped<ITrendSectionService, TrendSectionService>();
+            
+            // File Service Registration
+            builder.Services.AddScoped<IFileService, FileService>();
+            
             // Data Seed
             builder.Services.AddScoped<DataSeed>();
 

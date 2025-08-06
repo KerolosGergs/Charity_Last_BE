@@ -78,4 +78,9 @@ namespace Shared.DTOS.NewsDTOs
         public string ImageUrl { get; set; }
         public int NewsItemId { get; set; }
     }
+
+    public class AddImageToNewsDTO
+    {
+        public IFormFile Image { get; set; }
+    }
 } 
