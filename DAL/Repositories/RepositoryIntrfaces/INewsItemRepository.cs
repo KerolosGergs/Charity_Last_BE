@@ -11,5 +11,10 @@ namespace DAL.Repositories.RepositoryIntrfaces
         Task<List<NewsItem>> GetByAuthorAsync(string author);
         Task<int> GetTotalViewCountAsync();
         Task<List<NewsItem>> GetMostViewedNewsAsync(int count);
+
+        Task<NewsItem> GetByIdWithImagesAsync(int id);
+        Task<List<NewsItem>> GetAllWithImagesAsync();
+        Task<List<NewsItem>> GetActiveNewsWithImagesAsync();
+        Task<List<NewsItem>> GetByCategoryWithImagesAsync(string category);
     }
 } 

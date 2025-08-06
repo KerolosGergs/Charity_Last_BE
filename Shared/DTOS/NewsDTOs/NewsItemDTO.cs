@@ -18,6 +18,7 @@ namespace Shared.DTOS.NewsDTOs
         public DateTime? UpdatedAt { get; set; }
         public int ViewCount { get; set; }
         public string Tags { get; set; }
+        public List<string> ImageUrls { get; set; } = new List<string>();
     }
 
     public class CreateNewsItemDTO
@@ -33,18 +34,21 @@ namespace Shared.DTOS.NewsDTOs
         [Required]
         [StringLength(500)]
         public string Summary { get; set; }
+        public IFormFile? Image { get; set; }
 
-        //[StringLength(500)]
-        //public string ImageUrl { get; set; }
         [Required]
-        public IFormFile Image { get; set; }
+        [StringLength(100)]
+        public string Author { get; set; }
 
         [Required]
         [StringLength(100)]
         public string Category { get; set; }
 
-        public bool IsPublished { get; set; }
+        public bool IsPublished { get; set; } = false;
+
+        [StringLength(1000)]
         public string Tags { get; set; }
+        public List<IFormFile>? Images { get; set; } = new List<IFormFile>();
     }
 
     public class UpdateNewsItemDTO
@@ -57,13 +61,21 @@ namespace Shared.DTOS.NewsDTOs
 
         [StringLength(500)]
         public string Summary { get; set; }
-
         public IFormFile? Image { get; set; }
+        public List<IFormFile>? Images { get; set; } = new List<IFormFile>();
 
         [StringLength(100)]
         public string? Category { get; set; }
-
         public bool? IsPublished { get; set; }
+
+        [StringLength(1000)]
         public string Tags { get; set; }
+        public List<string>? ImagesToDelete { get; set; } = new List<string>();
+    }
+    public class NewsImageDTO
+    {
+        public int Id { get; set; }
+        public string ImageUrl { get; set; }
+        public int NewsItemId { get; set; }
     }
 } 

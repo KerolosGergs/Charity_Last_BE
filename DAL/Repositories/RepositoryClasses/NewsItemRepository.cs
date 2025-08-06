@@ -60,5 +60,34 @@ namespace DAL.Repositories.RepositoryClasses
                 .Take(count)
                 .ToListAsync();
         }
+        public async Task<NewsItem> GetByIdWithImagesAsync(int id)
+        {
+            return await _context.NewsItems
+                .Include(n => n.Images)
+                .FirstOrDefaultAsync(n => n.Id == id);
+        }
+        public async Task<List<NewsItem>> GetAllWithImagesAsync()
+        {
+            return await _context.NewsItems
+                .Include(n => n.Images)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+        }
+        public async Task<List<NewsItem>> GetActiveNewsWithImagesAsync()
+        {
+            return await _context.NewsItems
+                .Where(n => n.IsPublished)
+                .Include(n => n.Images)
+                .OrderByDescending(n => n.PublishedAt)
+                .ToListAsync();
+        }
+        public async Task<List<NewsItem>> GetByCategoryWithImagesAsync(string category)
+        {
+            return await _context.NewsItems
+                .Where(n => n.Category == category && n.IsPublished)
+                .Include(n => n.Images)
+                .OrderByDescending(n => n.PublishedAt)
+                .ToListAsync();
+        }
     }
 } 

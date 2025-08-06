@@ -44,6 +44,7 @@ namespace DAL.Data.Models
 
         [StringLength(1000)]
         public string Tags { get; set; } // JSON array of tags
+        public ICollection<NewsImage> Images { get; set; } = new List<NewsImage>();
     }
 
 

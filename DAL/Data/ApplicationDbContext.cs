@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using DAL.Data.Models;
@@ -38,6 +39,7 @@ namespace DAL.Data
         public DbSet<HeroSection> HeroSections { get; set; }
         public DbSet<HomeVideoSection>  HomeVideoSections { get; set; }
         public DbSet<TrendSection> TrendSections { get; set; }
+        public DbSet<NewsImage> NewsImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -107,6 +109,11 @@ namespace DAL.Data
                 .WithMany()
                 .HasForeignKey(a => a.AdvisorAvailabilityId)
                 .OnDelete(DeleteBehavior.Restrict);
+            builder.Entity<NewsImage>()
+                .HasOne(ni => ni.NewsItem)
+                .WithMany(n => n.Images)
+                .HasForeignKey(ni => ni.NewsItemId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

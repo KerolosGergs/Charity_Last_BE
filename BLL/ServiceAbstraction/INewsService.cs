@@ -15,5 +15,10 @@ namespace BLL.ServiceAbstraction
 
         // Statistics
         Task<object> GetNewsStatisticsAsync();
+
+        // Image Management
+        Task<bool> AddImageToNewsAsync(int newsId, string imageUrl);
+        Task<bool> RemoveImageFromNewsAsync(int newsId, string imageUrl);
+        Task<List<NewsImageDTO>> GetNewsImagesAsync(int newsId);
     }
 } 
