@@ -72,14 +72,14 @@ namespace Charity_BE.Controllers
         }
 
         // POST: api/dynamicpage
-        [HttpPost]
-      
+
+        [HttpPost("Create")]
         public async Task<ActionResult> Create([FromBody] CreateDynamicPageDto createDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-           
+
 
             var result = await _dynamicPageService.CreateAsync(createDto, "1");
             if (!result.Success)
@@ -95,7 +95,7 @@ namespace Charity_BE.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-         
+
 
             var result = await _dynamicPageService.UpdateAsync(id, updateDto, "1");
             if (!result.Success)
@@ -106,7 +106,7 @@ namespace Charity_BE.Controllers
 
         // DELETE: api/dynamicpage/{id}
         [HttpDelete("{id}")]
-       
+
         public async Task<ActionResult> Delete(int id)
         {
             var result = await _dynamicPageService.DeleteAsync(id);
@@ -120,7 +120,7 @@ namespace Charity_BE.Controllers
         [HttpPatch("{id}/toggle-active")]
         public async Task<ActionResult> ToggleActive(int id)
         {
-           
+
             var result = await _dynamicPageService.ToggleActiveAsync(id, "1");
             if (!result.Success)
                 return StatusCode(result.StatusCode, result);
@@ -130,7 +130,7 @@ namespace Charity_BE.Controllers
 
         // POST: api/dynamicpage/upload
         [HttpPost("upload")]
-       
+
         public async Task<ActionResult> UploadFile(IFormFile file, [FromQuery] string fileType)
         {
             if (file == null || file.Length == 0)
@@ -148,7 +148,7 @@ namespace Charity_BE.Controllers
 
         // DELETE: api/dynamicpage/delete-file
         [HttpDelete("delete-file")]
-       
+
         public async Task<ActionResult> DeleteFile([FromQuery] string fileUrl)
         {
             if (string.IsNullOrEmpty(fileUrl))
@@ -161,4 +161,4 @@ namespace Charity_BE.Controllers
             return Ok(result);
         }
     }
-} 
+}
