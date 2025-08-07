@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Data
 {
-    public class ApplicationDbContext :IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -37,9 +37,11 @@ namespace DAL.Data
         public DbSet<ImagesLibrary> ImagesLibrary { get; set; }
         public DbSet<VideosLibrary> VideosLibraries { get; set; }
         public DbSet<HeroSection> HeroSections { get; set; }
-        public DbSet<HomeVideoSection>  HomeVideoSections { get; set; }
+        public DbSet<HomeVideoSection> HomeVideoSections { get; set; }
         public DbSet<TrendSection> TrendSections { get; set; }
         public DbSet<NewsImage> NewsImages { get; set; }
+        public DbSet<DynamicPage> DynamicPages { get; set; }
+        public DbSet<DynamicPageItem> DynamicPageItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -97,6 +99,36 @@ namespace DAL.Data
             //    .WithMany()
             //    .HasForeignKey(l => l.CreatedBy)
             //    .OnDelete(DeleteBehavior.Restrict);
+
+            // DynamicPage Configuration
+
+
+            builder.Entity<DynamicPage>()
+                .HasMany(dp => dp.Items)
+                .WithOne(item => item.DynamicPage)
+                .HasForeignKey(item => item.DynamicPageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<DynamicPageItem>()
+                .Property(item => item.Type)
+                .HasMaxLength(50)
+                .IsRequired();
+
+            builder.Entity<DynamicPageItem>()
+                .Property(item => item.Content)
+                .IsRequired();
+
+            builder.Entity<DynamicPageItem>()
+                .Property(item => item.ImageUrl)
+                .HasMaxLength(500);
+
+            builder.Entity<DynamicPageItem>()
+                .Property(item => item.FileUrl)
+                .HasMaxLength(500);
+
+            builder.Entity<DynamicPageItem>()
+                .Property(item => item.FileName)
+                .HasMaxLength(255);
 
             builder.Entity<AdvisorAvailability>()
                 .HasOne(a => a.AdviceRequest)

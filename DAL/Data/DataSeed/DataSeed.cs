@@ -265,6 +265,7 @@ namespace DAL.Data.DataSeed
                 }
 
                 await _DbContext.SaveChangesAsync();
+
                 Console.WriteLine("Data seeding completed successfully!");
             }
             catch (Exception ex)

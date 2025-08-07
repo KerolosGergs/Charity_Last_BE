@@ -17,6 +17,7 @@ using Microsoft.OpenApi.Models;
 using BLL.Mapping;
 using Microsoft.Extensions.DependencyInjection;
 using BLL.Services.FileService;
+using DAL.Repositories;
 
 namespace Charity_BE
 {
@@ -34,7 +35,7 @@ namespace Charity_BE
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Charity API", Version = "v1" });
-                
+
                 // Add JWT Authentication to Swagger
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -60,7 +61,7 @@ namespace Charity_BE
                     }
                 });
             });
-            
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -120,6 +121,7 @@ namespace Charity_BE
             builder.Services.AddScoped<IHomeVideoSectionRepository, HomeVideoSectionRepository>();
             builder.Services.AddScoped<ITrendSectionRepository, TrendSectionRepository>();
             builder.Services.AddScoped<INewsImageRepository, NewsImageRepository>();
+            builder.Services.AddScoped<IDynamicPageRepository, DynamicPageRepository>();
 
 
             // Service Registrations
@@ -141,10 +143,11 @@ namespace Charity_BE
             builder.Services.AddScoped<IHeroSectionService, HeroSectionService>();
             builder.Services.AddScoped<IHomeVideoSectionService, HomeVideoSectionService>();
             builder.Services.AddScoped<ITrendSectionService, TrendSectionService>();
-            
+            builder.Services.AddScoped<IDynamicPageService, DynamicPageService>();
+
             // File Service Registration
             builder.Services.AddScoped<IFileService, FileService>();
-            
+
             // Data Seed
             builder.Services.AddScoped<DataSeed>();
 
@@ -164,10 +167,10 @@ namespace Charity_BE
 
             var app = builder.Build();
             app.UseStaticFiles();
-           
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
