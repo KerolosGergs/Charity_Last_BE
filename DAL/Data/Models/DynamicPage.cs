@@ -48,7 +48,7 @@ namespace DAL.Data.Models.IdentityModels
 
         [Required]
         [StringLength(50)]
-        public string Type { get; set; } // "text", "image_text", "file"
+        public string Type { get; set; } // "text", "image_text", "file", "video"
 
         [Required]
         public string Content { get; set; }
@@ -61,6 +61,9 @@ namespace DAL.Data.Models.IdentityModels
 
         [StringLength(255)]
         public string? FileName { get; set; }
+
+        [StringLength(500)]
+        public string? VideoUrl { get; set; }
 
         public int Order { get; set; }
 

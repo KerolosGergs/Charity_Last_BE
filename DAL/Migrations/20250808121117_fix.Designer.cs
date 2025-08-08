@@ -4,6 +4,7 @@ using DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250808121117_fix")]
+    partial class fix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1006,34 +1009,18 @@ namespace DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ServiceOfferings");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "Default Description",
-                            Title = "Default Title"
-                        });
-                });
-
-            modelBuilder.Entity("DAL.Data.Models.ServiceOfferingItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("ClickCount")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("ContactInfo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -1056,22 +1043,17 @@ namespace DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("ServiceOfferingId")
-                        .HasColumnType("int");
+                    b.Property<string>("Requirements")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ServiceOfferingId");
-
-                    b.ToTable("ServiceOfferingItems");
+                    b.ToTable("ServiceOfferings");
                 });
 
             modelBuilder.Entity("DAL.Data.Models.VideosLibrary", b =>
@@ -1448,17 +1430,6 @@ namespace DAL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DAL.Data.Models.ServiceOfferingItem", b =>
-                {
-                    b.HasOne("DAL.Data.Models.ServiceOffering", "ServiceOffering")
-                        .WithMany("ServiceItem")
-                        .HasForeignKey("ServiceOfferingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ServiceOffering");
-                });
-
             modelBuilder.Entity("DAL.Data.Models.VolunteerApplication", b =>
                 {
                     b.HasOne("DAL.Data.Models.IdentityModels.ApplicationUser", "User")
@@ -1562,11 +1533,6 @@ namespace DAL.Migrations
             modelBuilder.Entity("DAL.Data.Models.NewsItem", b =>
                 {
                     b.Navigation("Images");
-                });
-
-            modelBuilder.Entity("DAL.Data.Models.ServiceOffering", b =>
-                {
-                    b.Navigation("ServiceItem");
                 });
 #pragma warning restore 612, 618
         }
