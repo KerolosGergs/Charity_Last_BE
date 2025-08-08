@@ -23,7 +23,9 @@ namespace BLL.Service
         public async Task<bool> UpdateHeroSectionAsync(UpdateHeroSectionDTO dto)
         {
             var entity = await _heroSection.GetHeroSectionAsync();
-            if (entity == null) return false;
+            if (entity == null) {
+                return false;
+                 }
 
             entity.MainTitle = dto.MainTitle ?? entity.MainTitle;
             entity.Stats1Label = dto.Stats1Label ?? entity.Stats1Label;

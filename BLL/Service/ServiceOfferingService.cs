@@ -1,166 +1,124 @@
 using AutoMapper;
 using BLL.ServiceAbstraction;
-using DAL.Repositories.RepositoryIntrfaces;
-using DAL.Data.Models;
-using Shared.DTOS.ServiceOfferingDTOs;
 using BLL.Services.FileService;
+using DAL.Data.Models;
+using DAL.Repositories.RepositoryIntrfaces;
+using Shared.DTOS.ServiceOfferingDTOs;
 
-namespace BLL.Service
+public class ServiceOfferingService : IServiceOfferingService
 {
-    public class ServiceOfferingService : IServiceOfferingService
+    private readonly IServiceOfferingRepository _serviceOfferingRepository;
+    private readonly IFileService _fileService;
+    private readonly IMapper _mapper;
+
+    public ServiceOfferingService(IServiceOfferingRepository serviceOfferingRepository, IMapper mapper,IFileService fileService)
     {
-        private readonly IServiceOfferingRepository _serviceOfferingRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
+        _serviceOfferingRepository = serviceOfferingRepository;
+        _mapper = mapper;
+        _fileService = fileService;
+    }
 
-        public ServiceOfferingService(
-            IServiceOfferingRepository serviceOfferingRepository,
-            IUserRepository userRepository,
-            IMapper mapper)
+    public async Task<ServiceOfferingDTO> GetServiceOfferingAsync()
+    {
+        var service = await _serviceOfferingRepository.GetSingleAsync(); // Always ID = 1
+        return _mapper.Map<ServiceOfferingDTO>(service);
+    }
+    public async Task<ServiceOfferingDTO> GetServiceOfferingAvaliableAsync()
+    {
+        var service = await _serviceOfferingRepository.GetSingleAvialblyAsync(); // Always ID = 1
+        return _mapper.Map<ServiceOfferingDTO>(service);
+    }
+
+    public async Task<bool> UpdateTitleAndDescriptionAsync(string title, string description)
+    {
+        var service = await _serviceOfferingRepository.GetSingleAsync();
+        if (service == null) return false;
+
+        service.Title = title;
+        service.Description = description;
+        await _serviceOfferingRepository.UpdateAsync(service);
+        return true;
+    }
+
+    public async Task<ServiceOfferingDTOItem> AddServiceItemAsync(CreateServiceOfferingDTOItem dto)
+    {
+        var service = await _serviceOfferingRepository.GetSingleAsync();
+        if (service == null)
+            throw new InvalidOperationException("Default ServiceOffering not found.");
+
+        var entity = _mapper.Map<ServiceOfferingItem>(dto);
+        entity.ServiceOfferingId = service.Id;
+        entity.CreatedAt = DateTime.UtcNow;
+
+        if (dto.Image != null)
         {
-            _serviceOfferingRepository = serviceOfferingRepository;
-            _userRepository = userRepository;
-            _mapper = mapper;
+            string imageUrl = await _fileService.UploadFileAsync(dto.Image, "serviceOffering");
+            entity.ImageUrl = imageUrl;
         }
 
-        public async Task<List<ServiceOfferingDTO>> GetAllServicesAsync()
+        await _serviceOfferingRepository.AddServiceItemAsync(entity);
+        return _mapper.Map<ServiceOfferingDTOItem>(entity);
+    }
+
+    public async Task<ServiceOfferingDTOItem> UpdateServiceItemAsync(int itemId, UpdateServiceOfferingDTOItem dto)
+    {
+        var item = await _serviceOfferingRepository.GetItemByIdAsync(itemId);
+        if (item == null) return null;
+
+        // Map the updatable fields manually (or use AutoMapper for selected fields)
+        item.Name = dto.Name ?? item.Name;
+        item.Description = dto.Description ?? item.Description;
+        item.Url = dto.Url ?? item.Url;
+        if (dto.IsActive.HasValue)
+            item.IsActive = dto.IsActive.Value;
+
+        item.UpdatedAt = DateTime.UtcNow;
+
+        // Handle new image upload
+        if (dto.Image != null)
         {
-            var services = await _serviceOfferingRepository.GetAllAsync();
-            return _mapper.Map<List<ServiceOfferingDTO>>(services);
-        }
-
-        public async Task<List<ServiceOfferingDTO>> GetActiveServicesAsync()
-        {
-            var services = await _serviceOfferingRepository.GetActiveServicesAsync();
-            return _mapper.Map<List<ServiceOfferingDTO>>(services);
-        }
-
-        public async Task<ServiceOfferingDTO> GetServiceByIdAsync(int id)
-        {
-            var service = await _serviceOfferingRepository.GetByIdAsync(id);
-            return _mapper.Map<ServiceOfferingDTO>(service);
-        }
-
-        public async Task<ServiceOfferingDTO> CreateServiceAsync(CreateServiceOfferingDTO createServiceDto)
-        {
-            var service = _mapper.Map<ServiceOffering>(createServiceDto);
-            service.CreatedAt = DateTime.UtcNow;
-            FileService fs = new FileService();
-            var imgUrl = await fs.UploadFileAsync(createServiceDto.Image, "serviceOffering");
-            service.ImageUrl = imgUrl;
-            var createdService = await _serviceOfferingRepository.AddAsync(service);
-            return _mapper.Map<ServiceOfferingDTO>(createdService);
-        }
-
-        public async Task<ServiceOfferingDTO> UpdateServiceAsync(int id, UpdateServiceOfferingDTO updateServiceDto)
-        {
-            var service = await _serviceOfferingRepository.GetByIdAsync(id);
-            if (service == null)
-                return null;
-
-            // Update properties
-            if (!string.IsNullOrEmpty(updateServiceDto.Name))
-                service.Name = updateServiceDto.Name;
-
-            if (!string.IsNullOrEmpty(updateServiceDto.Description))
-                service.Description = updateServiceDto.Description;
-
-            if (!string.IsNullOrEmpty(updateServiceDto.Category))
-                service.Category = updateServiceDto.Category;
-
-            if (updateServiceDto.Image != null)
+            // Delete the old image if exists
+            if (!string.IsNullOrEmpty(item.ImageUrl))
             {
-                FileService fs = new FileService();
-                fs.DeleteFile(service.ImageUrl);
-                var imgUrl = await fs.UploadFileAsync(updateServiceDto.Image, "serviceOffering");
-                service.ImageUrl = imgUrl;
+                _fileService.DeleteFile(item.ImageUrl);
             }
 
-            if (updateServiceDto.IsActive.HasValue)
-                service.IsActive = updateServiceDto.IsActive.Value;
-
-            if (!string.IsNullOrEmpty(updateServiceDto.ContactInfo))
-                service.ContactInfo = updateServiceDto.ContactInfo;
-
-            if (!string.IsNullOrEmpty(updateServiceDto.Requirements))
-                service.Requirements = updateServiceDto.Requirements;
-
-            service.UpdatedAt = DateTime.UtcNow;
-
-            var updatedService = await _serviceOfferingRepository.UpdateAsync(service);
-            return _mapper.Map<ServiceOfferingDTO>(updatedService);
+            // Upload the new image
+            var imageUrl = await _fileService.UploadFileAsync(dto.Image, "serviceImages");
+            item.ImageUrl = imageUrl;
         }
 
-        public async Task<bool> DeleteServiceAsync(int id)
-        {
-            var service = await _serviceOfferingRepository.GetByIdAsync(id);
-            if (service == null)
-                return false;
-
-            await _serviceOfferingRepository.DeleteAsync(id);
-            return true;
-        }
-
-        public async Task<bool> IncrementClickCountAsync(int id)
-        {
-            var service = await _serviceOfferingRepository.GetByIdAsync(id);
-            if (service == null)
-                return false;
-
-            service.ClickCount++;
-            await _serviceOfferingRepository.UpdateAsync(service);
-            return true;
-        }
-
-        public async Task<object> GetServiceStatisticsAsync()
-        {
-            var services = await _serviceOfferingRepository.GetAllAsync();
-            
-            return new
-            {
-                TotalServices = services.Count(),
-                ActiveServices = services.Count(s => s.IsActive),
-                TotalClicks = services.Sum(s => s.ClickCount),
-                MostClickedServices = await _serviceOfferingRepository.GetMostClickedServicesAsync(5)
-            };
-        }
-
-        public async Task<List<ServiceOfferingDTO>> GetServicesByProviderAsync(string providerId)
-        {
-            var services = await _serviceOfferingRepository.GetServicesByProviderAsync(providerId);
-            return _mapper.Map<List<ServiceOfferingDTO>>(services);
-        }
-
-        public async Task<List<ServiceOfferingDTO>> GetServicesByCategoryAsync(string category)
-        {
-            var services = await _serviceOfferingRepository.GetServicesByCategoryAsync(category);
-            return _mapper.Map<List<ServiceOfferingDTO>>(services);
-        }
-
-        public async Task<List<ServiceOfferingDTO>> SearchServicesAsync(string searchTerm)
-        {
-            var services = await _serviceOfferingRepository.SearchServicesAsync(searchTerm);
-            return _mapper.Map<List<ServiceOfferingDTO>>(services);
-        }
-
-        public async Task<List<ServiceOfferingDTO>> GetServicesByLocationAsync(string location)
-        {
-            var services = await _serviceOfferingRepository.GetServicesByLocationAsync(location);
-            return _mapper.Map<List<ServiceOfferingDTO>>(services);
-        }
-
-        public async Task<List<string>> GetServiceCategoriesAsync()
-        {
-            return await _serviceOfferingRepository.GetServiceCategoriesAsync();
-        }
-
-        public async Task<List<string>> GetServiceLocationsAsync()
-        {
-            return await _serviceOfferingRepository.GetServiceLocationsAsync();
-        }
-        public async Task<int> GetTotalServicesCountAsync()
-        {
-            return await _serviceOfferingRepository.CountAsync();
-        }
+        await _serviceOfferingRepository.UpdateServiceItemAsync(item);
+        return _mapper.Map<ServiceOfferingDTOItem>(item);
     }
-} 
+
+
+    public async Task<bool> DeleteServiceItemAsync(int itemId)
+    {
+        var item = await _serviceOfferingRepository.GetItemByIdAsync(itemId);
+        if (item == null) return false;
+
+        // Delete the image from wwwroot if it exists
+        if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+        {
+            _fileService.DeleteFile(item.ImageUrl);
+        }
+
+        await _serviceOfferingRepository.DeleteServiceItemAsync(item);
+        return true;
+    }
+
+
+    public async Task<List<ServiceOfferingDTOItem>> GetServiceItemsAsync()
+    {
+        var items = await _serviceOfferingRepository.GetServiceItemsAsync();
+        return _mapper.Map<List<ServiceOfferingDTOItem>>(items);
+    }
+
+    public async Task<int> GetTotalServicesCountAsync()
+    {
+        var Items =await _serviceOfferingRepository.GetServiceItemsAsync();
+        return Items.Count;
+
+    }
+}

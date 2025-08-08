@@ -25,6 +25,8 @@ namespace DAL.Data
         public DbSet<Complaint> Complaints { get; set; }
         public DbSet<NewsItem> NewsItems { get; set; }
         public DbSet<ServiceOffering> ServiceOfferings { get; set; }
+        public DbSet<ServiceOfferingItem> ServiceOfferingItems { get; set; }
+
         public DbSet<VolunteerApplication> VolunteerApplications { get; set; }
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Consultation> Consultations { get; set; }
@@ -87,7 +89,17 @@ namespace DAL.Data
                 .WithMany(c => c.AdviceRequests)
                 .HasForeignKey(ar => ar.ConsultationId)
                 .OnDelete(DeleteBehavior.Cascade);
-
+            builder.Entity<ServiceOffering>()
+            .HasMany(s => s.ServiceItem)
+            .WithOne(i => i.ServiceOffering)
+            .HasForeignKey(i => i.ServiceOfferingId)
+            .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<ServiceOffering>().HasData(new ServiceOffering
+            {
+                Id = 1,
+                Title = "Default Title",
+                Description = "Default Description"
+            });
             //builder.Entity<Lecture>()
             //    .HasOne(l => l.Consultation)
             //    .WithMany(c => c.Lectures)
@@ -146,6 +158,8 @@ namespace DAL.Data
                 .WithMany(n => n.Images)
                 .HasForeignKey(ni => ni.NewsItemId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
         }
     }
 }

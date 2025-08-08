@@ -289,8 +289,8 @@ namespace BLL.Service
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var resetLink = $"{_configuration["FrontendUrl"]}/reset-password?email={WebUtility.UrlEncode(email)}&token={WebUtility.UrlEncode(token)}";
-
+            //var resetLink = $"{_configuration["FrontendUrl"]}/reset-password?email={WebUtility.UrlEncode(email)}&token={WebUtility.UrlEncode(token)}";
+            var resetLink = $"http://localhost:4200/reset-password?token={WebUtility.UrlEncode(token)}";
             string subject = "طلب إعادة تعيين كلمة المرور";
             string body = $@"
                 <p>مرحباً {user.FullName},</p>

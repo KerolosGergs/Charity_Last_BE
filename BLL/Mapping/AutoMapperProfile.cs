@@ -136,6 +136,9 @@ namespace BLL.Mapping
             CreateMap<CreateServiceOfferingDTO, ServiceOffering>();
             CreateMap<UpdateServiceOfferingDTO, ServiceOffering>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<ServiceOfferingItem, ServiceOfferingDTOItem>().ReverseMap();
+            CreateMap<CreateServiceOfferingDTOItem, ServiceOfferingItem>();
+            CreateMap<UpdateServiceOfferingDTOItem, ServiceOfferingItem>();
 
             // User Mappings
             CreateMap<ApplicationUser, UserDTO>()

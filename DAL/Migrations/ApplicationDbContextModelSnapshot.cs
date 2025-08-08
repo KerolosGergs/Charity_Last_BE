@@ -1002,18 +1002,34 @@ namespace DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Category")
+                    b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ClickCount")
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServiceOfferings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Default Description",
+                            Title = "Default Title"
+                        });
+                });
+
+            modelBuilder.Entity("DAL.Data.Models.ServiceOfferingItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("ContactInfo")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -1036,17 +1052,22 @@ namespace DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Requirements")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<int>("ServiceOfferingId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceOfferings");
+                    b.HasIndex("ServiceOfferingId");
+
+                    b.ToTable("ServiceOfferingItems");
                 });
 
             modelBuilder.Entity("DAL.Data.Models.VideosLibrary", b =>
@@ -1423,6 +1444,17 @@ namespace DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DAL.Data.Models.ServiceOfferingItem", b =>
+                {
+                    b.HasOne("DAL.Data.Models.ServiceOffering", "ServiceOffering")
+                        .WithMany("ServiceItem")
+                        .HasForeignKey("ServiceOfferingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ServiceOffering");
+                });
+
             modelBuilder.Entity("DAL.Data.Models.VolunteerApplication", b =>
                 {
                     b.HasOne("DAL.Data.Models.IdentityModels.ApplicationUser", "User")
@@ -1526,6 +1558,11 @@ namespace DAL.Migrations
             modelBuilder.Entity("DAL.Data.Models.NewsItem", b =>
                 {
                     b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("DAL.Data.Models.ServiceOffering", b =>
+                {
+                    b.Navigation("ServiceItem");
                 });
 #pragma warning restore 612, 618
         }

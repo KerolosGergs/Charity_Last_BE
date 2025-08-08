@@ -1,9 +1,22 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DAL.Data.Models
 {
     public class ServiceOffering
+    {
+        [Key]
+        public int Id { get; set; } = 1;
+        [Required]
+        public string Title { get; set; }
+        [Required]
+        public string Description { get; set; }
+
+
+        public List<ServiceOfferingItem> ServiceItem {get;set;}
+    }
+    public class ServiceOfferingItem
     {
         [Key]
         public int Id { get; set; }
@@ -18,7 +31,7 @@ namespace DAL.Data.Models
 
         [Required]
         [StringLength(50)]
-        public string Category { get; set; }
+        public string Url { get; set; }
 
         [StringLength(500)]
         public string ImageUrl { get; set; }
@@ -28,13 +41,13 @@ namespace DAL.Data.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
+        public int ServiceOfferingId { get; set; }
 
-        public int ClickCount { get; set; } = 0;
+        [ForeignKey("ServiceOfferingId")]
+        public ServiceOffering ServiceOffering { get; set; }
 
-        [StringLength(200)]
-        public string ContactInfo { get; set; }
 
-        [StringLength(500)]
-        public string Requirements { get; set; }
     }
+
 }
+
