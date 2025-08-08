@@ -99,6 +99,7 @@ namespace BLL.Service
                     ImageUrl = item.ImageUrl,
                     FileUrl = item.FileUrl,
                     FileName = item.FileName,
+                    VideoUrl = item.VideoUrl,
                     Order = item.Order,
                     CreatedAt = item.CreatedAt,
                     UpdatedAt = item.UpdatedAt
@@ -138,6 +139,7 @@ namespace BLL.Service
                         ImageUrl = item.ImageUrl,
                         FileUrl = item.FileUrl,
                         FileName = item.FileName,
+                        VideoUrl = item.VideoUrl,
                         Order = item.Order,
                         CreatedAt = DateTime.UtcNow
                     }).ToList()
@@ -192,6 +194,7 @@ namespace BLL.Service
                             existingItem.ImageUrl = itemDto.ImageUrl;
                             existingItem.FileUrl = itemDto.FileUrl;
                             existingItem.FileName = itemDto.FileName;
+                            existingItem.VideoUrl = itemDto.VideoUrl;
                             existingItem.Order = itemDto.Order;
                             existingItem.UpdatedAt = DateTime.UtcNow;
                             updatedItems.Add(existingItem);
@@ -208,6 +211,7 @@ namespace BLL.Service
                             ImageUrl = itemDto.ImageUrl,
                             FileUrl = itemDto.FileUrl,
                             FileName = itemDto.FileName,
+                            VideoUrl = itemDto.VideoUrl,
                             Order = itemDto.Order,
                             CreatedAt = DateTime.UtcNow
                         };
@@ -377,6 +381,7 @@ namespace BLL.Service
                     ImageUrl = item.ImageUrl,
                     FileUrl = item.FileUrl,
                     FileName = item.FileName,
+                    VideoUrl = item.VideoUrl,
                     Order = item.Order,
                     CreatedAt = item.CreatedAt,
                     UpdatedAt = item.UpdatedAt

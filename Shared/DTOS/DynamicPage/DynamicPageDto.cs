@@ -25,6 +25,7 @@ namespace Shared.DTOS.DynamicPage
         public string? ImageUrl { get; set; }
         public string? FileUrl { get; set; }
         public string? FileName { get; set; }
+        public string? VideoUrl { get; set; }
         public int Order { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
@@ -64,6 +65,9 @@ namespace Shared.DTOS.DynamicPage
 
         [StringLength(255)]
         public string? FileName { get; set; }
+
+        [StringLength(500)]
+        public string? VideoUrl { get; set; }
 
         public int Order { get; set; }
     }
@@ -105,6 +109,9 @@ namespace Shared.DTOS.DynamicPage
 
         [StringLength(255)]
         public string? FileName { get; set; }
+
+        [StringLength(500)]
+        public string? VideoUrl { get; set; }
 
         public int Order { get; set; }
     }
