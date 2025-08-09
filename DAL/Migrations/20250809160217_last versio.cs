@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class init2 : Migration
+    public partial class lastversio : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -75,6 +77,26 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DynamicPages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PageName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Slug = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DynamicPages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "HelpTypes",
                 columns: table => new
                 {
@@ -88,6 +110,74 @@ namespace DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_HelpTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "HeroSections",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BackgroundImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MainTitle = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Stats1Label = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Stats1Value = table.Column<int>(type: "int", nullable: true),
+                    Stats2Label = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Stats2Value = table.Column<int>(type: "int", nullable: true),
+                    Stats3Label = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Stats3Value = table.Column<int>(type: "int", nullable: true),
+                    Stats4Label = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Stats4Value = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HeroSections", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "HomeVideoSections",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    VideoUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HomeVideoSections", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ImagesLibrary",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ImagesLibrary", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NavigationItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    label = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    href = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NavigationItems", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -138,20 +228,46 @@ namespace DAL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ClickCount = table.Column<int>(type: "int", nullable: false),
-                    ContactInfo = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Requirements = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ServiceOfferings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrendSections",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ButtonText = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ButtonUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrendSections", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VideosLibraries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VideoUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VideosLibraries", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -437,25 +553,14 @@ namespace DAL.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
-                    Speaker = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
                     VideoUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    ThumbnailUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    FilePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    FileSize = table.Column<long>(type: "bigint", nullable: true),
-                    FileFormat = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Duration = table.Column<int>(type: "int", nullable: true),
                     IsPublished = table.Column<bool>(type: "bit", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PublishedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ViewCount = table.Column<int>(type: "int", nullable: false),
-                    DownloadCount = table.Column<int>(type: "int", nullable: false),
-                    ConsultationId = table.Column<int>(type: "int", nullable: true),
-                    Tags = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
-                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ConsultationId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -466,17 +571,38 @@ namespace DAL.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Lectures_AspNetUsers_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "FK_Lectures_Consultations_ConsultationId",
                         column: x => x.ConsultationId,
                         principalTable: "Consultations",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DynamicPageItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DynamicPageId = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    FileUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    FileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    VideoUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Order = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DynamicPageItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DynamicPageItems_DynamicPages_DynamicPageId",
+                        column: x => x.DynamicPageId,
+                        principalTable: "DynamicPages",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -500,6 +626,73 @@ namespace DAL.Migrations
                         name: "FK_HelpRequests_HelpTypes_HelpTypeId",
                         column: x => x.HelpTypeId,
                         principalTable: "HelpTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Pages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    subTilte = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    subLink = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NavItemsId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Pages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Pages_NavigationItems_NavItemsId",
+                        column: x => x.NavItemsId,
+                        principalTable: "NavigationItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NewsImages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    NewsItemId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NewsImages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_NewsImages_NewsItems_NewsItemId",
+                        column: x => x.NewsItemId,
+                        principalTable: "NewsItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ServiceOfferingItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ServiceOfferingId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ServiceOfferingItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ServiceOfferingItems_ServiceOfferings_ServiceOfferingId",
+                        column: x => x.ServiceOfferingId,
+                        principalTable: "ServiceOfferings",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -582,6 +775,101 @@ namespace DAL.Migrations
                         principalTable: "Advisors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "HeroSections",
+                columns: new[] { "Id", "BackgroundImageUrl", "MainTitle", "Stats1Label", "Stats1Value", "Stats2Label", "Stats2Value", "Stats3Label", "Stats3Value", "Stats4Label", "Stats4Value" },
+                values: new object[] { 1, "/images/hero-bg.jpg", "مرحباً بكم في موقعنا", "عدد المستفيدين", 1500, "المشاريع المكتملة", 120, "المتطوعين", 300, "سنوات الخبرة", 10 });
+
+            migrationBuilder.InsertData(
+                table: "HomeVideoSections",
+                columns: new[] { "Id", "Description", "Title", "VideoUrl" },
+                values: new object[] { 1, "فيديو قصير يوضح أهم الأنشطة والخدمات التي نقدمها.", "تعرف على خدماتنا", "https://www.youtube.com/watch?v=abcd1234" });
+
+            migrationBuilder.InsertData(
+                table: "NavigationItems",
+                columns: new[] { "Id", "href", "label" },
+                values: new object[,]
+                {
+                    { 1, "/home", "الرئيسية" },
+                    { 2, "/about-layout/about", "عن الجمعية" },
+                    { 3, "/governance/regulations", "الحوكمة" },
+                    { 4, "/help-layout/we-offer", "طلبات المساعدة" },
+                    { 5, "/support-layout/bank-accounts", "المشاركة في الدعم" },
+                    { 6, "/blank-page", "التنمية وإصلاح ذات البين" },
+                    { 7, "/investment-layout/real-state", "النشاط الاستثماري" },
+                    { 8, "/medcineLayout/GeneralDefinition", "الخدمات الطبية" },
+                    { 9, "/volunteer-layout/unit", "التطوع" },
+                    { 10, "/about-layout/contact-phone", "التواصل والشكاوى" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ServiceOfferings",
+                columns: new[] { "Id", "Description", "Title" },
+                values: new object[] { 1, "Default Description", "Default Title" });
+
+            migrationBuilder.InsertData(
+                table: "TrendSections",
+                columns: new[] { "Id", "ButtonText", "ButtonUrl", "Description", "ImageUrl", "Title" },
+                values: new object[] { 1, "المزيد", "/initiatives", "تعرف على آخر المبادرات والبرامج التي أطلقناها لخدمة المجتمع.", "/images/trend.jpg", "أحدث مبادراتنا" });
+
+            migrationBuilder.InsertData(
+                table: "Pages",
+                columns: new[] { "Id", "NavItemsId", "subLink", "subTilte" },
+                values: new object[,]
+                {
+                    { 1001, 2, "/about-layout/vision-mission", " الرسالة والرؤية" },
+                    { 1002, 2, "/about-layout/about-summary", "نبذة عن الجمعية" },
+                    { 1003, 2, "/about-layout/tasks-authorities", "مهام الجمعية" },
+                    { 1004, 2, "/about-layout/general-assembly", "الجمعية العمومية" },
+                    { 1005, 2, "/about-layout/board-members", "مجلس الأدارة" },
+                    { 1006, 2, "/about-layout/organizational-structure", "الهيكل النظيمى" },
+                    { 1007, 2, "/about-layout/service-locations", "مواقع العمل" },
+                    { 1008, 2, "/about-layout/ImageLibrary", "مكتبة الصور والفيديوهات" },
+                    { 1101, 3, "/governance/regulations", "الأنظمة واللوائح " },
+                    { 1102, 3, "/governance/policies", "السياسات" },
+                    { 1103, 3, "/blank-page", "التقارير السنوية" },
+                    { 1104, 3, "/governance/quarterly-reports", "التقارير الربعية" },
+                    { 1105, 3, "/governance/financial-reports", "القوائم المالية" },
+                    { 1106, 3, "/blank-page", "معايير الحوكمة" },
+                    { 1107, 3, "/governance/governance-evaluation", "نتائج تقييم الحوكمة" },
+                    { 1108, 3, "/governance/strategic-plans", "الخطة الاستراتيجية" },
+                    { 1109, 3, "/governance/operational-plan", "الخطة التشغيلية" },
+                    { 1110, 3, "/governance/Goals", "الأهداف" },
+                    { 1201, 4, "/help-layout/we-offer", "ماذا نقدم؟" },
+                    { 1202, 4, "/help-layout/eligible", "الفئات المستحقة" },
+                    { 1203, 4, "/help-layout/requirements", "المستندات المطلوبة" },
+                    { 1204, 4, "/HelpPeopole", "الحصول على الخدمة" },
+                    { 1205, 4, "/blank-page", "إحصاءات" },
+                    { 1301, 5, "/blank-page", "نشاطات الجمعية" },
+                    { 1302, 5, "/support-layout/bank-accounts", "حسابات الجمعية" },
+                    { 1303, 5, "https://jkmm.org.sa/ElectronicServices/Donate#", "الحصول على الخدمة" },
+                    { 1304, 5, "/blank-page", "إحصاءات" },
+                    { 1401, 6, "/blank-page", "تعريف عام بالنشاط" },
+                    { 1402, 6, "/all-consultants", "طلب استشارة أون لاين" },
+                    { 1403, 6, "/RequesrRepair", "طلب إصلاح ذات البين" },
+                    { 1404, 6, "/complaints", "تقديم شكوى" },
+                    { 1405, 6, "/awarness-lecture", "محاضرات توعوية" },
+                    { 1406, 6, "/blank-page", "إحصاءات" },
+                    { 1501, 7, "/blank-page", "تعريف عام بالنشاط" },
+                    { 1502, 7, "/investment-layout/real-state", "الاستثمارات العقارية" },
+                    { 1503, 7, "/investment-layout/invest-project", "المشروعات الاستثمارية" },
+                    { 1504, 7, "/blank-page", "مشروعات التنمية المستدامة" },
+                    { 1505, 7, "/blank-page", "إحصاءات" },
+                    { 1601, 8, "/medcineLayout/GeneralDefinition", "تعريف عام بالنشاط" },
+                    { 1602, 8, "/medcineLayout/MedicalCenter", "مركز غسيل الكلى" },
+                    { 1603, 8, "/medcineLayout/HairingCenter", "مركز السمع والنطق" },
+                    { 1604, 8, "/blank-page", "الخدمات الطبية من خارج الجمعية" },
+                    { 1605, 8, "/blank-page", "إحصاءات" },
+                    { 1701, 9, "/volunteer-layout/unit", "تعريف بالنشاط" },
+                    { 1702, 9, "/blank-page", "ميثاق التطوع" },
+                    { 1703, 9, "/volunteer-layout/volunteer-medical", "مجالات التطوع" },
+                    { 1704, 9, "/Voulenteer", "الحصول على الخدمة" },
+                    { 1705, 9, "/blank-page", "إحصاءات التطوع" },
+                    { 1801, 10, "/blank-page", "تقديم مقترح" },
+                    { 1802, 10, "/complaints", "تقديم شكوى" },
+                    { 1803, 10, "/Satisfaction", "قياسات الرضا" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -678,6 +966,11 @@ namespace DAL.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DynamicPageItems_DynamicPageId",
+                table: "DynamicPageItems",
+                column: "DynamicPageId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_HelpRequests_HelpTypeId",
                 table: "HelpRequests",
                 column: "HelpTypeId");
@@ -693,20 +986,30 @@ namespace DAL.Migrations
                 column: "ConsultationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Lectures_CreatedBy",
-                table: "Lectures",
-                column: "CreatedBy");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Mediations_UserId",
                 table: "Mediations",
                 column: "UserId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_NewsImages_NewsItemId",
+                table: "NewsImages",
+                column: "NewsItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Pages_NavItemsId",
+                table: "Pages",
+                column: "NavItemsId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ReconcileRequests_UserId",
                 table: "ReconcileRequests",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ServiceOfferingItems_ServiceOfferingId",
+                table: "ServiceOfferingItems",
+                column: "ServiceOfferingId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_VolunteerApplications_UserId",
@@ -759,7 +1062,19 @@ namespace DAL.Migrations
                 name: "Complaints");
 
             migrationBuilder.DropTable(
+                name: "DynamicPageItems");
+
+            migrationBuilder.DropTable(
                 name: "HelpRequests");
+
+            migrationBuilder.DropTable(
+                name: "HeroSections");
+
+            migrationBuilder.DropTable(
+                name: "HomeVideoSections");
+
+            migrationBuilder.DropTable(
+                name: "ImagesLibrary");
 
             migrationBuilder.DropTable(
                 name: "Lectures");
@@ -768,16 +1083,25 @@ namespace DAL.Migrations
                 name: "Mediations");
 
             migrationBuilder.DropTable(
-                name: "NewsItems");
+                name: "NewsImages");
 
             migrationBuilder.DropTable(
                 name: "Notifications");
 
             migrationBuilder.DropTable(
+                name: "Pages");
+
+            migrationBuilder.DropTable(
                 name: "ReconcileRequests");
 
             migrationBuilder.DropTable(
-                name: "ServiceOfferings");
+                name: "ServiceOfferingItems");
+
+            migrationBuilder.DropTable(
+                name: "TrendSections");
+
+            migrationBuilder.DropTable(
+                name: "VideosLibraries");
 
             migrationBuilder.DropTable(
                 name: "VolunteerApplications");
@@ -786,7 +1110,19 @@ namespace DAL.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "DynamicPages");
+
+            migrationBuilder.DropTable(
                 name: "HelpTypes");
+
+            migrationBuilder.DropTable(
+                name: "NewsItems");
+
+            migrationBuilder.DropTable(
+                name: "NavigationItems");
+
+            migrationBuilder.DropTable(
+                name: "ServiceOfferings");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
