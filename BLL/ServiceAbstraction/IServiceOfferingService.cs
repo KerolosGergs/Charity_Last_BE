@@ -4,13 +4,13 @@ namespace BLL.ServiceAbstraction
 {
     public interface IServiceOfferingService
     {
-        Task<List<ServiceOfferingDTO>> GetAllServicesAsync();
-        Task<List<ServiceOfferingDTO>> GetActiveServicesAsync();
-        Task<ServiceOfferingDTO> GetServiceByIdAsync(int id);
-        Task<ServiceOfferingDTO> CreateServiceAsync(CreateServiceOfferingDTO createServiceDto);
-        Task<ServiceOfferingDTO> UpdateServiceAsync(int id, UpdateServiceOfferingDTO updateServiceDto);
-        Task<bool> DeleteServiceAsync(int id);
-        Task<bool> IncrementClickCountAsync(int id);
+        Task<ServiceOfferingDTO> GetServiceOfferingAsync();
+        Task<ServiceOfferingDTO> GetServiceOfferingAvaliableAsync();
+        Task<bool> UpdateTitleAndDescriptionAsync(string title, string description);
+        Task<ServiceOfferingDTOItem> AddServiceItemAsync(CreateServiceOfferingDTOItem dto);
+        Task<ServiceOfferingDTOItem> UpdateServiceItemAsync(int itemId, UpdateServiceOfferingDTOItem dto);
+        Task<bool> DeleteServiceItemAsync(int itemId);
+        Task<List<ServiceOfferingDTOItem>> GetServiceItemsAsync();
         Task<int> GetTotalServicesCountAsync();
     }
 } 

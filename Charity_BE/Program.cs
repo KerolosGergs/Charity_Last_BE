@@ -122,6 +122,7 @@ namespace Charity_BE
             builder.Services.AddScoped<ITrendSectionRepository, TrendSectionRepository>();
             builder.Services.AddScoped<INewsImageRepository, NewsImageRepository>();
             builder.Services.AddScoped<IDynamicPageRepository, DynamicPageRepository>();
+            builder.Services.AddScoped<INavItemRepository, NavItemRepository>();
 
 
             // Service Registrations
@@ -144,6 +145,7 @@ namespace Charity_BE
             builder.Services.AddScoped<IHomeVideoSectionService, HomeVideoSectionService>();
             builder.Services.AddScoped<ITrendSectionService, TrendSectionService>();
             builder.Services.AddScoped<IDynamicPageService, DynamicPageService>();
+            builder.Services.AddScoped<INavItemService, NavItemService>();
 
             // File Service Registration
             builder.Services.AddScoped<IFileService, FileService>();

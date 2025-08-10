@@ -350,6 +350,22 @@ namespace DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("HeroSections");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            BackgroundImageUrl = "/images/hero-bg.jpg",
+                            MainTitle = "مرحباً بكم في موقعنا",
+                            Stats1Label = "عدد المستفيدين",
+                            Stats1Value = 1500,
+                            Stats2Label = "المشاريع المكتملة",
+                            Stats2Value = 120,
+                            Stats3Label = "المتطوعين",
+                            Stats3Value = 300,
+                            Stats4Label = "سنوات الخبرة",
+                            Stats4Value = 10
+                        });
                 });
 
             modelBuilder.Entity("DAL.Data.Models.HomePage.HomeVideoSection", b =>
@@ -373,6 +389,15 @@ namespace DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("HomeVideoSections");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "فيديو قصير يوضح أهم الأنشطة والخدمات التي نقدمها.",
+                            Title = "تعرف على خدماتنا",
+                            VideoUrl = "https://www.youtube.com/watch?v=abcd1234"
+                        });
                 });
 
             modelBuilder.Entity("DAL.Data.Models.HomePage.TrendSection", b =>
@@ -401,6 +426,17 @@ namespace DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TrendSections");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ButtonText = "المزيد",
+                            ButtonUrl = "/initiatives",
+                            Description = "تعرف على آخر المبادرات والبرامج التي أطلقناها لخدمة المجتمع.",
+                            ImageUrl = "/images/trend.jpg",
+                            Title = "أحدث مبادراتنا"
+                        });
                 });
 
             modelBuilder.Entity("DAL.Data.Models.IdentityModels.Admin", b =>
@@ -831,6 +867,89 @@ namespace DAL.Migrations
                     b.ToTable("Lectures");
                 });
 
+            modelBuilder.Entity("DAL.Data.Models.NavItems", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("href")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("label")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NavigationItems");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            href = "/home",
+                            label = "الرئيسية"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            href = "/about-layout/about",
+                            label = "عن الجمعية"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            href = "/governance/regulations",
+                            label = "الحوكمة"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            href = "/help-layout/we-offer",
+                            label = "طلبات المساعدة"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            href = "/support-layout/bank-accounts",
+                            label = "المشاركة في الدعم"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            href = "/blank-page",
+                            label = "التنمية وإصلاح ذات البين"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            href = "/investment-layout/real-state",
+                            label = "النشاط الاستثماري"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            href = "/medcineLayout/GeneralDefinition",
+                            label = "الخدمات الطبية"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            href = "/volunteer-layout/unit",
+                            label = "التطوع"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            href = "/about-layout/contact-phone",
+                            label = "التواصل والشكاوى"
+                        });
+                });
+
             modelBuilder.Entity("DAL.Data.Models.NewsImage", b =>
                 {
                     b.Property<int>("Id")
@@ -953,6 +1072,391 @@ namespace DAL.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("DAL.Data.Models.Pages", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("NavItemsId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("subLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("subTilte")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NavItemsId");
+
+                    b.ToTable("Pages");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1001,
+                            NavItemsId = 2,
+                            subLink = "/about-layout/vision-mission",
+                            subTilte = " الرسالة والرؤية"
+                        },
+                        new
+                        {
+                            Id = 1002,
+                            NavItemsId = 2,
+                            subLink = "/about-layout/about-summary",
+                            subTilte = "نبذة عن الجمعية"
+                        },
+                        new
+                        {
+                            Id = 1003,
+                            NavItemsId = 2,
+                            subLink = "/about-layout/tasks-authorities",
+                            subTilte = "مهام الجمعية"
+                        },
+                        new
+                        {
+                            Id = 1004,
+                            NavItemsId = 2,
+                            subLink = "/about-layout/general-assembly",
+                            subTilte = "الجمعية العمومية"
+                        },
+                        new
+                        {
+                            Id = 1005,
+                            NavItemsId = 2,
+                            subLink = "/about-layout/board-members",
+                            subTilte = "مجلس الأدارة"
+                        },
+                        new
+                        {
+                            Id = 1006,
+                            NavItemsId = 2,
+                            subLink = "/about-layout/organizational-structure",
+                            subTilte = "الهيكل النظيمى"
+                        },
+                        new
+                        {
+                            Id = 1007,
+                            NavItemsId = 2,
+                            subLink = "/about-layout/service-locations",
+                            subTilte = "مواقع العمل"
+                        },
+                        new
+                        {
+                            Id = 1008,
+                            NavItemsId = 2,
+                            subLink = "/about-layout/ImageLibrary",
+                            subTilte = "مكتبة الصور والفيديوهات"
+                        },
+                        new
+                        {
+                            Id = 1101,
+                            NavItemsId = 3,
+                            subLink = "/governance/regulations",
+                            subTilte = "الأنظمة واللوائح "
+                        },
+                        new
+                        {
+                            Id = 1102,
+                            NavItemsId = 3,
+                            subLink = "/governance/policies",
+                            subTilte = "السياسات"
+                        },
+                        new
+                        {
+                            Id = 1103,
+                            NavItemsId = 3,
+                            subLink = "/blank-page",
+                            subTilte = "التقارير السنوية"
+                        },
+                        new
+                        {
+                            Id = 1104,
+                            NavItemsId = 3,
+                            subLink = "/governance/quarterly-reports",
+                            subTilte = "التقارير الربعية"
+                        },
+                        new
+                        {
+                            Id = 1105,
+                            NavItemsId = 3,
+                            subLink = "/governance/financial-reports",
+                            subTilte = "القوائم المالية"
+                        },
+                        new
+                        {
+                            Id = 1106,
+                            NavItemsId = 3,
+                            subLink = "/blank-page",
+                            subTilte = "معايير الحوكمة"
+                        },
+                        new
+                        {
+                            Id = 1107,
+                            NavItemsId = 3,
+                            subLink = "/governance/governance-evaluation",
+                            subTilte = "نتائج تقييم الحوكمة"
+                        },
+                        new
+                        {
+                            Id = 1108,
+                            NavItemsId = 3,
+                            subLink = "/governance/strategic-plans",
+                            subTilte = "الخطة الاستراتيجية"
+                        },
+                        new
+                        {
+                            Id = 1109,
+                            NavItemsId = 3,
+                            subLink = "/governance/operational-plan",
+                            subTilte = "الخطة التشغيلية"
+                        },
+                        new
+                        {
+                            Id = 1110,
+                            NavItemsId = 3,
+                            subLink = "/governance/Goals",
+                            subTilte = "الأهداف"
+                        },
+                        new
+                        {
+                            Id = 1201,
+                            NavItemsId = 4,
+                            subLink = "/help-layout/we-offer",
+                            subTilte = "ماذا نقدم؟"
+                        },
+                        new
+                        {
+                            Id = 1202,
+                            NavItemsId = 4,
+                            subLink = "/help-layout/eligible",
+                            subTilte = "الفئات المستحقة"
+                        },
+                        new
+                        {
+                            Id = 1203,
+                            NavItemsId = 4,
+                            subLink = "/help-layout/requirements",
+                            subTilte = "المستندات المطلوبة"
+                        },
+                        new
+                        {
+                            Id = 1204,
+                            NavItemsId = 4,
+                            subLink = "/HelpPeopole",
+                            subTilte = "الحصول على الخدمة"
+                        },
+                        new
+                        {
+                            Id = 1205,
+                            NavItemsId = 4,
+                            subLink = "/blank-page",
+                            subTilte = "إحصاءات"
+                        },
+                        new
+                        {
+                            Id = 1301,
+                            NavItemsId = 5,
+                            subLink = "/blank-page",
+                            subTilte = "نشاطات الجمعية"
+                        },
+                        new
+                        {
+                            Id = 1302,
+                            NavItemsId = 5,
+                            subLink = "/support-layout/bank-accounts",
+                            subTilte = "حسابات الجمعية"
+                        },
+                        new
+                        {
+                            Id = 1303,
+                            NavItemsId = 5,
+                            subLink = "https://jkmm.org.sa/ElectronicServices/Donate#",
+                            subTilte = "الحصول على الخدمة"
+                        },
+                        new
+                        {
+                            Id = 1304,
+                            NavItemsId = 5,
+                            subLink = "/blank-page",
+                            subTilte = "إحصاءات"
+                        },
+                        new
+                        {
+                            Id = 1401,
+                            NavItemsId = 6,
+                            subLink = "/blank-page",
+                            subTilte = "تعريف عام بالنشاط"
+                        },
+                        new
+                        {
+                            Id = 1402,
+                            NavItemsId = 6,
+                            subLink = "/all-consultants",
+                            subTilte = "طلب استشارة أون لاين"
+                        },
+                        new
+                        {
+                            Id = 1403,
+                            NavItemsId = 6,
+                            subLink = "/RequesrRepair",
+                            subTilte = "طلب إصلاح ذات البين"
+                        },
+                        new
+                        {
+                            Id = 1404,
+                            NavItemsId = 6,
+                            subLink = "/complaints",
+                            subTilte = "تقديم شكوى"
+                        },
+                        new
+                        {
+                            Id = 1405,
+                            NavItemsId = 6,
+                            subLink = "/awarness-lecture",
+                            subTilte = "محاضرات توعوية"
+                        },
+                        new
+                        {
+                            Id = 1406,
+                            NavItemsId = 6,
+                            subLink = "/blank-page",
+                            subTilte = "إحصاءات"
+                        },
+                        new
+                        {
+                            Id = 1501,
+                            NavItemsId = 7,
+                            subLink = "/blank-page",
+                            subTilte = "تعريف عام بالنشاط"
+                        },
+                        new
+                        {
+                            Id = 1502,
+                            NavItemsId = 7,
+                            subLink = "/investment-layout/real-state",
+                            subTilte = "الاستثمارات العقارية"
+                        },
+                        new
+                        {
+                            Id = 1503,
+                            NavItemsId = 7,
+                            subLink = "/investment-layout/invest-project",
+                            subTilte = "المشروعات الاستثمارية"
+                        },
+                        new
+                        {
+                            Id = 1504,
+                            NavItemsId = 7,
+                            subLink = "/blank-page",
+                            subTilte = "مشروعات التنمية المستدامة"
+                        },
+                        new
+                        {
+                            Id = 1505,
+                            NavItemsId = 7,
+                            subLink = "/blank-page",
+                            subTilte = "إحصاءات"
+                        },
+                        new
+                        {
+                            Id = 1601,
+                            NavItemsId = 8,
+                            subLink = "/medcineLayout/GeneralDefinition",
+                            subTilte = "تعريف عام بالنشاط"
+                        },
+                        new
+                        {
+                            Id = 1602,
+                            NavItemsId = 8,
+                            subLink = "/medcineLayout/MedicalCenter",
+                            subTilte = "مركز غسيل الكلى"
+                        },
+                        new
+                        {
+                            Id = 1603,
+                            NavItemsId = 8,
+                            subLink = "/medcineLayout/HairingCenter",
+                            subTilte = "مركز السمع والنطق"
+                        },
+                        new
+                        {
+                            Id = 1604,
+                            NavItemsId = 8,
+                            subLink = "/blank-page",
+                            subTilte = "الخدمات الطبية من خارج الجمعية"
+                        },
+                        new
+                        {
+                            Id = 1605,
+                            NavItemsId = 8,
+                            subLink = "/blank-page",
+                            subTilte = "إحصاءات"
+                        },
+                        new
+                        {
+                            Id = 1701,
+                            NavItemsId = 9,
+                            subLink = "/volunteer-layout/unit",
+                            subTilte = "تعريف بالنشاط"
+                        },
+                        new
+                        {
+                            Id = 1702,
+                            NavItemsId = 9,
+                            subLink = "/blank-page",
+                            subTilte = "ميثاق التطوع"
+                        },
+                        new
+                        {
+                            Id = 1703,
+                            NavItemsId = 9,
+                            subLink = "/volunteer-layout/volunteer-medical",
+                            subTilte = "مجالات التطوع"
+                        },
+                        new
+                        {
+                            Id = 1704,
+                            NavItemsId = 9,
+                            subLink = "/Voulenteer",
+                            subTilte = "الحصول على الخدمة"
+                        },
+                        new
+                        {
+                            Id = 1705,
+                            NavItemsId = 9,
+                            subLink = "/blank-page",
+                            subTilte = "إحصاءات التطوع"
+                        },
+                        new
+                        {
+                            Id = 1801,
+                            NavItemsId = 10,
+                            subLink = "/blank-page",
+                            subTilte = "تقديم مقترح"
+                        },
+                        new
+                        {
+                            Id = 1802,
+                            NavItemsId = 10,
+                            subLink = "/complaints",
+                            subTilte = "تقديم شكوى"
+                        },
+                        new
+                        {
+                            Id = 1803,
+                            NavItemsId = 10,
+                            subLink = "/Satisfaction",
+                            subTilte = "قياسات الرضا"
+                        });
+                });
+
             modelBuilder.Entity("DAL.Data.Models.ReconcileRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -1006,18 +1510,34 @@ namespace DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Category")
+                    b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ClickCount")
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServiceOfferings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Default Description",
+                            Title = "Default Title"
+                        });
+                });
+
+            modelBuilder.Entity("DAL.Data.Models.ServiceOfferingItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("ContactInfo")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -1040,17 +1560,22 @@ namespace DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Requirements")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<int>("ServiceOfferingId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceOfferings");
+                    b.HasIndex("ServiceOfferingId");
+
+                    b.ToTable("ServiceOfferingItems");
                 });
 
             modelBuilder.Entity("DAL.Data.Models.VideosLibrary", b =>
@@ -1418,6 +1943,17 @@ namespace DAL.Migrations
                     b.Navigation("NewsItem");
                 });
 
+            modelBuilder.Entity("DAL.Data.Models.Pages", b =>
+                {
+                    b.HasOne("DAL.Data.Models.NavItems", "NavItems")
+                        .WithMany("pages")
+                        .HasForeignKey("NavItemsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NavItems");
+                });
+
             modelBuilder.Entity("DAL.Data.Models.ReconcileRequest", b =>
                 {
                     b.HasOne("DAL.Data.Models.IdentityModels.ApplicationUser", "User")
@@ -1425,6 +1961,17 @@ namespace DAL.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DAL.Data.Models.ServiceOfferingItem", b =>
+                {
+                    b.HasOne("DAL.Data.Models.ServiceOffering", "ServiceOffering")
+                        .WithMany("ServiceItem")
+                        .HasForeignKey("ServiceOfferingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ServiceOffering");
                 });
 
             modelBuilder.Entity("DAL.Data.Models.VolunteerApplication", b =>
@@ -1527,9 +2074,19 @@ namespace DAL.Migrations
                     b.Navigation("Items");
                 });
 
+            modelBuilder.Entity("DAL.Data.Models.NavItems", b =>
+                {
+                    b.Navigation("pages");
+                });
+
             modelBuilder.Entity("DAL.Data.Models.NewsItem", b =>
                 {
                     b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("DAL.Data.Models.ServiceOffering", b =>
+                {
+                    b.Navigation("ServiceItem");
                 });
 #pragma warning restore 612, 618
         }

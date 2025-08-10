@@ -9,166 +9,70 @@ namespace DAL.Repositories.RepositoryClasses
     public class ServiceOfferingRepository : GenericRepository<ServiceOffering>, IServiceOfferingRepository
     {
         private readonly ApplicationDbContext _context;
+
         public ServiceOfferingRepository(ApplicationDbContext context) : base(context)
         {
             _context = context;
         }
 
-        public async Task<List<ServiceOffering>> GetAllServicesWithProviderAsync()
+        // Get the one and only service offering record (Id = 1)
+        public async Task<ServiceOffering> GetSingleAsync()
         {
             return await _context.ServiceOfferings
-                .OrderByDescending(s => s.CreatedAt)
+                .Include(s => s.ServiceItem)
+                .FirstOrDefaultAsync(s => s.Id == 1);
+        }
+        public async Task<ServiceOffering> GetSingleAvialblyAsync()
+        {
+            return await _context.ServiceOfferings
+                .Include(s => s.ServiceItem.Where(i=>i.IsActive==true))
+                .FirstOrDefaultAsync(s => s.Id == 1);
+        }
+
+
+        public async Task<bool> UpdateTitleAndDescriptionAsync(string title, string description)
+        {
+            var service = await GetSingleAsync();
+            if (service == null) return false;
+
+            service.Title = title;
+            service.Description = description;
+
+            _context.ServiceOfferings.Update(service);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<List<ServiceOfferingItem>> GetServiceItemsAsync()
+        {
+            return await _context.ServiceOfferingItems
+                .Where(i => i.ServiceOfferingId == 1&&i.IsActive==true)
+                .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
         }
 
-        public async Task<List<ServiceOffering>> GetActiveServicesWithProviderAsync()
+        public async Task<ServiceOfferingItem> GetItemByIdAsync(int id)
         {
-            return await _context.ServiceOfferings
-                .Where(s => s.IsActive)
-                .OrderByDescending(s => s.CreatedAt)
-                .ToListAsync();
+            return await _context.ServiceOfferingItems
+                .FirstOrDefaultAsync(i => i.Id == id && i.ServiceOfferingId == 1);
         }
 
-        public async Task<ServiceOffering> GetServiceByIdWithProviderAsync(int id)
+        public async Task AddServiceItemAsync(ServiceOfferingItem item)
         {
-            return await _context.ServiceOfferings
-                .FirstOrDefaultAsync(s => s.Id == id);
+            _context.ServiceOfferingItems.Add(item);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task<List<ServiceOffering>> GetServicesByProviderAsync(string providerId)
+        public async Task UpdateServiceItemAsync(ServiceOfferingItem item)
         {
-            // Since there's no ProviderId in the model, return empty list or implement based on your needs
-            return new List<ServiceOffering>();
+            _context.ServiceOfferingItems.Update(item);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task<List<ServiceOffering>> GetServicesByCategoryAsync(string category)
+        public async Task DeleteServiceItemAsync(ServiceOfferingItem item)
         {
-            return await _context.ServiceOfferings
-                .Where(s => s.Category == category && s.IsActive)
-                .OrderByDescending(s => s.CreatedAt)
-                .ToListAsync();
-        }
-
-        public async Task<List<ServiceOffering>> SearchServicesAsync(string searchTerm)
-        {
-            return await _context.ServiceOfferings
-                .Where(s => s.IsActive && (s.Name.Contains(searchTerm) || s.Description.Contains(searchTerm)))
-                .OrderByDescending(s => s.CreatedAt)
-                .ToListAsync();
-        }
-
-        public async Task<List<ServiceOffering>> GetServicesByLocationAsync(string location)
-        {
-            // Since there's no Location in the model, return empty list or implement based on your needs
-            return new List<ServiceOffering>();
-        }
-
-        public async Task<int> GetTotalServicesCountAsync()
-        {
-            return await _context.ServiceOfferings.CountAsync();
-        }
-
-        public async Task<int> GetActiveServicesCountAsync()
-        {
-            return await _context.ServiceOfferings.CountAsync(s => s.IsActive);
-        }
-
-        public async Task<int> GetInactiveServicesCountAsync()
-        {
-            return await _context.ServiceOfferings.CountAsync(s => !s.IsActive);
-        }
-
-        public async Task<List<object>> GetServicesByCategoryCountAsync()
-        {
-            return await _context.ServiceOfferings
-                .GroupBy(s => s.Category)
-                .Select(g => new
-                {
-                    Category = g.Key,
-                    Count = g.Count()
-                })
-                .OrderByDescending(x => x.Count)
-                .ToListAsync<object>();
-        }
-
-        public async Task<List<object>> GetServicesByLocationCountAsync()
-        {
-            // Since there's no Location in the model, return empty list
-            return new List<object>();
-        }
-
-        public async Task<List<object>> GetServicesByMonthAsync(int months)
-        {
-            var startDate = DateTime.UtcNow.AddMonths(-months);
-            return await _context.ServiceOfferings
-                .Where(s => s.CreatedAt >= startDate)
-                .GroupBy(s => new { s.CreatedAt.Year, s.CreatedAt.Month })
-                .Select(g => new
-                {
-                    Year = g.Key.Year,
-                    Month = g.Key.Month,
-                    Count = g.Count()
-                })
-                .OrderBy(x => x.Year).ThenBy(x => x.Month)
-                .ToListAsync<object>();
-        }
-
-        public async Task<List<object>> GetTopProvidersAsync(int count)
-        {
-            // Since there's no Provider in the model, return empty list
-            return new List<object>();
-        }
-
-        public async Task<List<string>> GetServiceCategoriesAsync()
-        {
-            return await _context.ServiceOfferings
-                .Where(s => s.IsActive)
-                .Select(s => s.Category)
-                .Distinct()
-                .ToListAsync();
-        }
-
-        public async Task<List<string>> GetServiceLocationsAsync()
-        {
-            // Since there's no Location in the model, return empty list
-            return new List<string>();
-        }
-
-        public async Task<bool> HasServicesAsync(string providerId)
-        {
-            // Since there's no ProviderId in the model, return false
-            return false;
-        }
-
-        public async Task<List<ServiceOffering>> GetActiveServicesAsync()
-        {
-            return await _context.ServiceOfferings
-                .Where(s => s.IsActive)
-                .OrderBy(s => s.Name)
-                .ToListAsync();
-        }
-
-        public async Task<List<ServiceOffering>> GetByCategoryAsync(string category)
-        {
-            return await _context.ServiceOfferings
-                .Where(s => s.Category == category && s.IsActive)
-                .OrderBy(s => s.Name)
-                .ToListAsync();
-        }
-
-        public async Task<List<ServiceOffering>> GetMostClickedServicesAsync(int count)
-        {
-            return await _context.ServiceOfferings
-                .Where(s => s.IsActive)
-                .OrderByDescending(s => s.ClickCount)
-                .Take(count)
-                .ToListAsync();
-        }
-
-        public async Task<int> GetTotalClickCountAsync()
-        {
-            return await _context.ServiceOfferings
-                .SumAsync(s => s.ClickCount);
+            _context.ServiceOfferingItems.Remove(item);
+            await _context.SaveChangesAsync();
         }
     }
-} 
+}

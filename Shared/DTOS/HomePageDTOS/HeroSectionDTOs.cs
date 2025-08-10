@@ -23,9 +23,9 @@ namespace Shared.DTOS.HomePageDTOS
     }
     public class UpdateHeroSectionDTO
     {
-        public string MainTitle { get; set; }
-        public IFormFile BackgroundImageUrl { get; set; }
-        public string Stats1Label { get; set; }
+        public string? MainTitle { get; set; }
+        public IFormFile? BackgroundImageUrl { get; set; }
+        public string? Stats1Label { get; set; }
         public int? Stats1Value { get; set; }
         public string Stats2Label { get; set; }
         public int? Stats2Value { get; set; }
