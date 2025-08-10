@@ -4,15 +4,13 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using System.Net;
 using Shared.DTOS.AuthDTO;
 using BLL.ServiceAbstraction;
 using DAL.Data.Models.IdentityModels;
 using DAL.Repositories.RepositoryIntrfaces;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using System.Data;
-using System.Net;
 
 namespace BLL.Service
 {
@@ -50,6 +48,21 @@ namespace BLL.Service
             return await _userManager.FindByEmailAsync(email) != null;
         }
 
+        private string TranslateIdentityError(IdentityError error)
+        {
+            return error.Code switch
+            {
+                "DuplicateUserName" or "DuplicateEmail" => "البريد الإلكتروني مستخدم بالفعل",
+                "InvalidEmail" => "البريد الإلكتروني غير صالح",
+                "PasswordTooShort" => "كلمة المرور قصيرة جدًا، يجب أن تكون على الأقل 8 أحرف",
+                "PasswordRequiresNonAlphanumeric" => "كلمة المرور يجب أن تحتوي على رمز واحد على الأقل",
+                "PasswordRequiresDigit" => "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل",
+                "PasswordRequiresUpper" => "كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل",
+                "PasswordRequiresLower" => "كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل",
+                _ => error.Description
+            };
+        }
+
         private async Task<string> CreateTokenAsync(ApplicationUser user)
         {
             var claims = new List<Claim>
@@ -82,7 +95,7 @@ namespace BLL.Service
         public async Task<AuthResponseDTO> RegisterAdminAsync(RegisterAdminDTO dto)
         {
             if (await IsEmailExistAsync(dto.Email))
-                throw new Exception("Email already exists");
+                throw new Exception("البريد الإلكتروني مستخدم بالفعل");
 
             var user = new ApplicationUser
             {
@@ -95,7 +108,7 @@ namespace BLL.Service
 
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
-                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+                throw new Exception(string.Join("، ", result.Errors.Select(TranslateIdentityError)));
 
             await _userManager.AddToRoleAsync(user, "Admin");
 
@@ -117,14 +130,16 @@ namespace BLL.Service
                 FullName = user.FullName,
                 Email = user.Email,
                 Role = "Admin",
-                Token = token
+                Token = token,
+                Success = true,
+                Message = "تم إنشاء حساب المدير بنجاح"
             };
         }
 
         public async Task<AuthResponseDTO> RegisterAdvisorAsync(RegisterAdvisorDTO dto)
         {
             if (await IsEmailExistAsync(dto.Email))
-                throw new Exception("Email already exists");
+                throw new Exception("البريد الإلكتروني مستخدم بالفعل");
 
             var user = new ApplicationUser
             {
@@ -137,7 +152,7 @@ namespace BLL.Service
 
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
-                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+                throw new Exception(string.Join("، ", result.Errors.Select(TranslateIdentityError)));
 
             await _userManager.AddToRoleAsync(user, "Advisor");
 
@@ -162,7 +177,9 @@ namespace BLL.Service
                 FullName = user.FullName,
                 Email = user.Email,
                 Role = "Advisor",
-                Token = token
+                Token = token,
+                Success = true,
+                Message = "تم إنشاء حساب المستشار بنجاح"
             };
         }
 
@@ -181,37 +198,32 @@ namespace BLL.Service
 
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
-            {
-                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
-            }
+                throw new Exception(string.Join("، ", result.Errors.Select(TranslateIdentityError)));
 
             await _userManager.AddToRoleAsync(user, "User");
 
             var token = await CreateTokenAsync(user);
             var roles = await _userManager.GetRolesAsync(user);
-            var currentUserDto = new CurrentUserDTO
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber ?? string.Empty,
-                Role = roles.ToList(),
-                IsActive = user.IsActive
-            };
 
             return new AuthResponseDTO
             {
                 FullName = user.FullName,
                 Email = user.Email,
-                Role = roles.FirstOrDefault() ?? "User",  
+                Role = roles.FirstOrDefault() ?? "User",
                 Token = token,
                 Success = true,
-                Message = "Registration successful",
-                RefreshToken = null,  
+                Message = "تم إنشاء الحساب بنجاح",
                 ExpiresAt = DateTime.UtcNow.AddHours(1),
-                User = currentUserDto
+                User = new CurrentUserDTO
+                {
+                    Id = user.Id,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber ?? string.Empty,
+                    Role = roles.ToList(),
+                    IsActive = user.IsActive
+                }
             };
-
         }
 
         public async Task<AuthResponseDTO> LoginAsync(LoginDTO dto)
@@ -224,11 +236,14 @@ namespace BLL.Service
                 .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
 
             if (user == null)
-                throw new Exception("Invalid credentials");
+                throw new Exception("البريد الإلكتروني غير مسجل لدينا");
+
+            if (!user.IsActive)
+                throw new Exception("الحساب غير مفعل");
 
             var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, dto.Password);
             if (!isPasswordCorrect)
-                throw new Exception("Invalid credentials");
+                throw new Exception("كلمة المرور غير صحيحة");
 
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault() ?? "User";
@@ -249,6 +264,9 @@ namespace BLL.Service
                 Role = role,
                 RoleId = roleId,
                 Token = token,
+                Success = true,
+                Message = "تم تسجيل الدخول بنجاح",
+                ExpiresAt = DateTime.UtcNow.AddDays(double.Parse(_configuration["JWT:DurationInDays"]!)),
                 User = new CurrentUserDTO
                 {
                     Id = user.Id,
@@ -256,18 +274,14 @@ namespace BLL.Service
                     Email = user.Email,
                     Role = roles.ToList(),
                     IsActive = user.IsActive
-                },
-                Success = true,
-                ExpiresAt = DateTime.UtcNow.AddDays(double.Parse(_configuration["JWT:DurationInDays"]!)),
-                Message = "Login successful",
-                RefreshToken = null
+                }
             };
         }
+
         public async Task<CurrentUserDTO> GetCurrentUserAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-                return null;
+            if (user == null) return null;
 
             var roles = await _userManager.GetRolesAsync(user);
 
@@ -280,13 +294,11 @@ namespace BLL.Service
                 IsActive = user.IsActive
             };
         }
+
         public async Task<bool> ForgotPasswordAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                return true;
-            }
+            if (user == null) return true;
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var resetLink = $"{_configuration["FrontendUrl"]}/reset-password?email={WebUtility.UrlEncode(email)}&token={WebUtility.UrlEncode(token)}";
@@ -297,6 +309,7 @@ namespace BLL.Service
                 <p>لقد تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بك. اضغط على الرابط أدناه لتعيين كلمة مرور جديدة:</p>
                 <p><a href='{resetLink}'>إعادة تعيين كلمة المرور</a></p>
                 <p>إذا لم تطلب هذا، يرجى تجاهل هذا البريد.</p>";
+
             await _emailService.SendEmailAsync(email, subject, body);
             return true;
         }
@@ -305,11 +318,13 @@ namespace BLL.Service
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
             if (user == null)
-            {
-                return false;
-            }
+                throw new Exception("البريد الإلكتروني غير مسجل");
+
             var resetPassResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
-            return resetPassResult.Succeeded;
+            if (!resetPassResult.Succeeded)
+                throw new Exception(string.Join("، ", resetPassResult.Errors.Select(TranslateIdentityError)));
+
+            return true;
         }
     }
 }
