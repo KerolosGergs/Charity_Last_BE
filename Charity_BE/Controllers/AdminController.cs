@@ -111,7 +111,7 @@ namespace Charity_BE.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ApiResponse<AdminDTO>.ErrorResult("Failed to create admin", 500));
+                return StatusCode(500, ApiResponse<AdminDTO>.ErrorResult(ex.Message, 500));
             }
         }
 
