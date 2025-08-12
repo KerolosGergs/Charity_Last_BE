@@ -103,20 +103,18 @@ namespace Charity_BE.Tests.SimpleTests
             var complaint = new Complaint
             {
                 Id = 1,
-                UserId = "1",
-                Title = "Test Complaint",
+                UserName = "Test User",
+                Email = "Test@gmail.com",
+                PhoneNumber = "1234567890",
                 Description = "Test Description",
                 Category = ComplaintCategory.Other,
                 Status = ComplaintStatus.Pending,
-                Priority = "Medium"
             };
 
             // Assert
             complaint.Should().NotBeNull();
             complaint.Id.Should().Be(1);
-            complaint.Title.Should().Be("Test Complaint");
             complaint.Status.Should().Be(ComplaintStatus.Pending);
-            complaint.Priority.Should().Be("Medium");
         }
     }
-} 
+}

@@ -15,18 +15,9 @@ namespace DAL.Repositories.RepositoryClasses
             _context = context;
         }
 
-        public async Task<List<Complaint>> GetAllComplaintsWithUserAsync()
+        public async Task<List<Complaint>> GetAllComplaintsAsync()
         {
             return await _context.Complaints
-                .Include(c => c.User)
-                .OrderByDescending(c => c.CreatedAt)
-                .ToListAsync();
-        }
-
-        public async Task<List<Complaint>> GetComplaintsByUserAsync(string userId)
-        {
-            return await _context.Complaints
-                .Where(c => c.UserId == userId)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
         }
@@ -70,39 +61,21 @@ namespace DAL.Repositories.RepositoryClasses
         public async Task<List<Complaint>> GetRecentComplaintsAsync(int count)
         {
             return await _context.Complaints
-                .Include(c => c.User)
                 .OrderByDescending(c => c.CreatedAt)
                 .Take(count)
-                .ToListAsync();
-        }
-
-        public async Task<bool> HasActiveComplaintsAsync(string userId)
-        {
-            return await _context.Complaints
-                .AnyAsync(c => c.UserId == userId && 
-                              (c.Status == ComplaintStatus.Pending || c.Status == ComplaintStatus.InProgress));
-        }
-
-        public async Task<List<Complaint>> GetByUserIdAsync(string userId)
-        {
-            return await _context.Complaints
-                .Include(c => c.User)
-                .Where(c => c.UserId == userId)
                 .ToListAsync();
         }
 
         public async Task<List<Complaint>> GetByStatusAsync(ComplaintStatus status)
         {
             return await _context.Complaints
-                .Include(c => c.User)
                 .Where(c => c.Status == status)
                 .ToListAsync();
         }
 
-        public async Task<List<Complaint>> GetByCategoryAsync(Shared.DTOS.ComplaintDTOs.ComplaintCategory category)
+        public async Task<List<Complaint>> GetByCategoryAsync(ComplaintCategory category)
         {
             return await _context.Complaints
-                .Include(c => c.User)
                 .Where(c => c.Category == category)
                 .ToListAsync();
         }
@@ -110,7 +83,6 @@ namespace DAL.Repositories.RepositoryClasses
         public async Task<List<Complaint>> GetPendingComplaintsAsync()
         {
             return await _context.Complaints
-                .Include(c => c.User)
                 .Where(c => c.Status == ComplaintStatus.Pending)
                 .ToListAsync();
         }
@@ -118,7 +90,6 @@ namespace DAL.Repositories.RepositoryClasses
         public async Task<List<Complaint>> GetResolvedComplaintsAsync()
         {
             return await _context.Complaints
-                .Include(c => c.User)
                 .Where(c => c.Status == ComplaintStatus.Resolved)
                 .ToListAsync();
         }
@@ -128,15 +99,6 @@ namespace DAL.Repositories.RepositoryClasses
             return await _context.Complaints
                 .CountAsync(c => c.Status == status);
         }
-
-        public async Task<int> GetTotalComplaintsByUserAsync(string userId)
-        {
-            return await _context.Complaints.CountAsync(c => c.UserId == userId);
-        }
-
-        public async Task<int> GetPendingComplaintsByUserAsync(string userId)
-        {
-            return await _context.Complaints.CountAsync(c => c.UserId == userId && c.Status == ComplaintStatus.Pending);
-        }
     }
-} 
+
+}

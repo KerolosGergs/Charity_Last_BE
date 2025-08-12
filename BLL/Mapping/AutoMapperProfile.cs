@@ -77,9 +77,9 @@ namespace BLL.Mapping
             CreateMap<UpdateComplaintDTO, Complaint>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
             CreateMap<Complaint, ComplaintDTO>()
-               .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName))
-                .ForMember(dest => dest.email, opt => opt.MapFrom(src => src.User.Email))
-                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.User.PhoneNumber));
+               .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber));
             // Consultation Mappings
             CreateMap<Consultation, ConsultationDTO>();
             CreateMap<CreateConsultationDTO, Consultation>();

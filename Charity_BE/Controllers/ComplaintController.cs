@@ -45,42 +45,18 @@ namespace Charity_BE.Controllers
                 return StatusCode(500, ApiResponse<List<ComplaintDTO>>.ErrorResult("Failed to retrieve complaints", 500));
             }
         }
-        // GET: api/complaint/user
-        [HttpGet("user")]
-        //[Authorize]
-        public async Task<ActionResult<ApiResponse<List<ComplaintDTO>>>> GetUserComplaints()
-        {
-            try
-            {
-                var userId = User.FindFirst("sub")?.Value;
-                if (string.IsNullOrEmpty(userId))
-                    return Unauthorized(ApiResponse<List<ComplaintDTO>>.ErrorResult("User not authenticated", 401));
 
-                var complaints = await _complaintService.GetUserComplaintsAsync(userId);
-                return Ok(ApiResponse<List<ComplaintDTO>>.SuccessResult(complaints));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ApiResponse<List<ComplaintDTO>>.ErrorResult("Failed to retrieve complaints", 500));
-            }
-        }
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<ComplaintDTO>>> Create(
-              [FromQuery] string userId,
-              [FromBody] CreateComplaintDTO dto)
+        public async Task<ActionResult<ApiResponse<ComplaintDTO>>> Create([FromBody] CreateComplaintDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<ComplaintDTO>.ErrorResult("Invalid input data", 400,
                     ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()));
 
-            if (string.IsNullOrEmpty(userId))
-                return BadRequest(ApiResponse<ComplaintDTO>.ErrorResult("User ID is required", 400));
+            // إنشاء الشكوى
+            var createdComplaint = await _complaintService.CreateComplaintAsync(dto);
 
-            var createdComplaint = await _complaintService.CreateComplaintAsync(userId, dto);
-
-            var user = await _userService.GetUserByIdAsync(userId);
-            var userName = user.FullName;
-
+            // جلب جميع الأدمنز
             var admins = await _adminService.GetAllAdminsAsync();
             foreach (var admin in admins)
             {
@@ -88,7 +64,7 @@ namespace Charity_BE.Controllers
                 {
                     UserId = admin.UserId,
                     Title = "شكوى جديدة",
-                    Message = $"قام المستخدم {userName} بتقديم شكوى جديدة. يرجى مراجعتها.",
+                    Message = $"قام المستخدم {dto.UserName} بتقديم شكوى جديدة. يرجى مراجعتها.",
                     Type = NotificationType.General
                 };
                 await _notificationService.AddNotificationAsync(notification);
@@ -97,13 +73,14 @@ namespace Charity_BE.Controllers
                 if (!string.IsNullOrEmpty(admin.Email))
                 {
                     string subject = "شكوى جديدة من أحد المستخدمين";
-                    string body = $"<p>قام المستخدم <b>{userName}</b> بتقديم شكوى جديدة.</p><p>يرجى مراجعتها من خلال لوحة التحكم.</p>";
+                    string body = $"<p>قام المستخدم <b>{dto.UserName}</b> بتقديم شكوى جديدة.</p><p>يرجى مراجعتها من خلال لوحة التحكم.</p>";
                     await _emailService.SendEmailAsync(admin.Email, subject, body);
                 }
             }
 
             return Ok(ApiResponse<ComplaintDTO>.SuccessResult(createdComplaint, "Complaint created successfully"));
         }
+
         // PUT: api/complaint/{id}
         [HttpPut("{id}")]
         //[Authorize(Roles = "Admin")]

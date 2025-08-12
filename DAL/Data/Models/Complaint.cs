@@ -14,31 +14,25 @@ namespace DAL.Data.Models
     {
         [Key]
         public int Id { get; set; }
-
         [Required]
-        public string UserId { get; set; }
-        public ApplicationUser User { get; set; }
-
+        [StringLength(100)]
+        public string UserName { get; set; }
         [Required]
-        [StringLength(200)]
-        public string Title { get; set; }
-
+        [EmailAddress]
+        public string Email { get; set; }
         [Required]
         [StringLength(2000)]
         public string Description { get; set; }
+        [Required]
+        [StringLength(25)]
+        public string PhoneNumber { get; set; }
 
         [Required]
         public ComplaintCategory Category { get; set; }
 
         [Required]
         public ComplaintStatus Status { get; set; } = ComplaintStatus.Pending;
-
-        [Required]
-        [StringLength(20)]
-        public string Priority { get; set; } = "Medium";
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
         public DateTime? UpdatedAt { get; set; }
 
         public DateTime? ResolvedAt { get; set; }
@@ -46,7 +40,6 @@ namespace DAL.Data.Models
         [StringLength(2000)]
         public string? Resolution { get; set; }
 
-        // Navigation Properties
     }
 
     //public enum ComplaintStatus
@@ -57,4 +50,3 @@ namespace DAL.Data.Models
     //    Closed
     //}
 }
-

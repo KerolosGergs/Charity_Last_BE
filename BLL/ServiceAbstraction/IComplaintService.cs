@@ -6,8 +6,7 @@ namespace BLL.ServiceAbstraction
     {
         // Complaint Management
         Task<List<ComplaintDTO>> GetAllComplaintsAsync();
-        Task<List<ComplaintDTO>> GetUserComplaintsAsync(string userId);
-        Task<ComplaintDTO> CreateComplaintAsync(string userId, CreateComplaintDTO createComplaintDto);
+        Task<ComplaintDTO> CreateComplaintAsync(CreateComplaintDTO createComplaintDto);
         Task<ComplaintDTO> UpdateComplaintAsync(int id, UpdateComplaintDTO updateComplaintDto);
         Task<bool> DeleteComplaintAsync(int id);
         Task<ComplaintDTO> UpdateComplaintStatusAsync(int id, ComplaintStatus status);
@@ -16,4 +15,4 @@ namespace BLL.ServiceAbstraction
         Task<object> GetComplaintStatisticsAsync();
         Task<int> GetTotalComplaintsCountAsync();
     }
-} 
+}

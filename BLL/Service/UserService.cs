@@ -203,8 +203,6 @@ namespace BLL.Service
             var totalConsultations = await _adviceRequestRepository.GetTotalConsultationsByUserAsync(userId);
             var pendingConsultations = await _adviceRequestRepository.GetPendingConsultationsByUserAsync(userId);
             var completedConsultations = await _adviceRequestRepository.GetCompletedConsultationsByUserAsync(userId);
-            var totalComplaints = await _complaintRepository.GetTotalComplaintsByUserAsync(userId);
-            var pendingComplaints = await _complaintRepository.GetPendingComplaintsByUserAsync(userId);
             var volunteerApplications = await _volunteerRepository.GetVolunteerApplicationsByUserAsync(userId);
 
             return new
@@ -214,8 +212,6 @@ namespace BLL.Service
                 TotalConsultations = totalConsultations,
                 PendingConsultations = pendingConsultations,
                 CompletedConsultations = completedConsultations,
-                TotalComplaints = totalComplaints,
-                PendingComplaints = pendingComplaints,
                 VolunteerApplications = volunteerApplications.Count,
                 LastLogin = user.LastLoginAt,
                 IsActive = user.IsActive

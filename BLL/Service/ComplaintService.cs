@@ -5,62 +5,63 @@ using DAL.Data.Models;
 using Shared.DTOS.ComplaintDTOs;
 using Microsoft.EntityFrameworkCore;
 using Shared.DTOS.NotificationDTOs;
+using Microsoft.AspNetCore.Identity;
+using DAL.Data.Models.IdentityModels;
 
 namespace BLL.Service
 {
     public class ComplaintService : IComplaintService
     {
         private readonly IComplaintRepository _complaintRepository;
-        private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
         private readonly IEmailService _emailService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public ComplaintService(
             IComplaintRepository complaintRepository,
-            IUserRepository userRepository,
             IMapper mapper,
             INotificationService notificationService,
-            IEmailService emailService)
+            IEmailService emailService,
+            UserManager<ApplicationUser> userManager)
         {
             _complaintRepository = complaintRepository;
-            _userRepository = userRepository;
             _mapper = mapper;
             _notificationService = notificationService;
             _emailService = emailService;
+            _userManager = userManager;
         }
 
         public async Task<List<ComplaintDTO>> GetAllComplaintsAsync()
         {
-            var complaints = await _complaintRepository.GetAllComplaintsWithUserAsync();
+            var complaints = await _complaintRepository.GetAllComplaintsAsync();
             return _mapper.Map<List<ComplaintDTO>>(complaints);
         }
 
-        public async Task<List<ComplaintDTO>> GetUserComplaintsAsync(string userId)
-        {
-            var complaints = await _complaintRepository.GetByUserIdAsync(userId);
-            return _mapper.Map<List<ComplaintDTO>>(complaints);
-        }
-
-        public async Task<ComplaintDTO> CreateComplaintAsync(string userId, CreateComplaintDTO createComplaintDto)
+        public async Task<ComplaintDTO> CreateComplaintAsync(CreateComplaintDTO createComplaintDto)
         {
             var complaint = _mapper.Map<Complaint>(createComplaintDto);
-            complaint.UserId = userId;
             complaint.Status = ComplaintStatus.Pending;
             complaint.CreatedAt = DateTime.UtcNow;
 
             var createdComplaint = await _complaintRepository.AddAsync(complaint);
 
-            // إرسال إشعار للأدمن عند إضافة شكوى جديدة
-            var adminEmail = "admin@example.com"; // عدل هذا لاحقًا لجلب كل الأدمنز
-            var notification = new NotificationCreateDTO {
-                UserId = "admin", // عدل هذا لاحقًا ليكون لكل الأدمنز
-                Title = "شكوى جديدة",
-                Message = $"تم تقديم شكوى جديدة بعنوان: {complaint.Title}",
-                Type = NotificationType.Complaint
-            };
-            //await _notificationService.AddNotificationAsync(notification);
-            //await _emailService.SendEmailAsync(adminEmail, notification.Title, notification.Message);
+            // جلب كل الأدمنز
+            var admins = await _userManager.GetUsersInRoleAsync("Admin");
+
+            foreach (var admin in admins)
+            {
+                var notification = new NotificationCreateDTO
+                {
+                    UserId = admin.Id,
+                    Title = "شكوى جديدة",
+                    Message = "تم تقديم شكوى جديدة",
+                    Type = NotificationType.Complaint
+                };
+
+                await _notificationService.AddNotificationAsync(notification);
+                await _emailService.SendEmailAsync(admin.Email, notification.Title, notification.Message);
+            }
 
             return _mapper.Map<ComplaintDTO>(createdComplaint);
         }
@@ -71,28 +72,20 @@ namespace BLL.Service
             if (complaint == null)
                 return null;
 
-            // Update properties
-            if (!string.IsNullOrEmpty(updateComplaintDto.Title))
-                complaint.Title = updateComplaintDto.Title;
-
             if (!string.IsNullOrEmpty(updateComplaintDto.Description))
                 complaint.Description = updateComplaintDto.Description;
 
             if (updateComplaintDto.Category.HasValue)
                 complaint.Category = updateComplaintDto.Category.Value;
 
-            if (!string.IsNullOrEmpty(updateComplaintDto.Priority))
-                complaint.Priority = updateComplaintDto.Priority;
-
-            if (!string.IsNullOrEmpty(updateComplaintDto.Status))
-                complaint.Status = (ComplaintStatus)Enum.Parse(typeof(ComplaintStatus), updateComplaintDto.Status);
+            if (updateComplaintDto.Status.HasValue)
+                complaint.Status = updateComplaintDto.Status.Value;
 
             if (!string.IsNullOrEmpty(updateComplaintDto.Resolution))
                 complaint.Resolution = updateComplaintDto.Resolution;
 
             complaint.UpdatedAt = DateTime.UtcNow;
 
-            // Set resolved date if status is Resolved
             if (complaint.Status == ComplaintStatus.Resolved && !complaint.ResolvedAt.HasValue)
                 complaint.ResolvedAt = DateTime.UtcNow;
 
@@ -119,25 +112,10 @@ namespace BLL.Service
             complaint.Status = status;
             complaint.UpdatedAt = DateTime.UtcNow;
 
-            // Set resolved date if status is Resolved
             if (status == ComplaintStatus.Resolved && !complaint.ResolvedAt.HasValue)
                 complaint.ResolvedAt = DateTime.UtcNow;
 
             var updatedComplaint = await _complaintRepository.UpdateAsync(complaint);
-
-            // إرسال إشعار للمستخدم عند تغيير حالة الشكوى
-            var user = await _userRepository.GetByIdAsync(complaint.UserId);
-            if (user != null)
-            {
-                var notification = new NotificationCreateDTO {
-                    UserId = user.Id,
-                    Title = "تحديث حالة الشكوى",
-                    Message = $"تم تغيير حالة الشكوى الخاصة بك إلى: {status}",
-                    Type = NotificationType.Complaint
-                };
-                await _notificationService.AddNotificationAsync(notification);
-                await _emailService.SendEmailAsync(user.Email, notification.Title, notification.Message);
-            }
 
             return _mapper.Map<ComplaintDTO>(updatedComplaint);
         }
@@ -155,9 +133,11 @@ namespace BLL.Service
                 ClosedComplaints = complaints.Count(c => c.Status == ComplaintStatus.Closed)
             };
         }
+
         public async Task<int> GetTotalComplaintsCountAsync()
         {
             return await _complaintRepository.CountAsync();
         }
     }
-} 
+
+}
