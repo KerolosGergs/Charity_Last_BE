@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using BLL.ServiceAbstraction;
 using DAL.Repositories.RepositoryIntrfaces;
 using DAL.Data.Models.IdentityModels;
@@ -44,7 +44,7 @@ namespace BLL.Service
             // Check if user already exists
             var existingUser = await _userManager.FindByEmailAsync(createAdminDto.Email);
             if (existingUser != null)
-                throw new InvalidOperationException("User with this email already exists");
+                throw new InvalidOperationException("هذا الايميل موجود من قبل ");
 
             // Create ApplicationUser
             var user = new ApplicationUser
@@ -58,10 +58,12 @@ namespace BLL.Service
 
             var result = await _userManager.CreateAsync(user, createAdminDto.Password);
             if (!result.Succeeded)
-                throw new InvalidOperationException($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                throw new InvalidOperationException(" الباسورد المستخدم غير صالح يرجي إنشاء باسورد اقوي");
 
-            // Add to Admin role
-            await _userManager.AddToRoleAsync(user, "Admin");
+                //throw new InvalidOperationException($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+
+                // Add to Admin role
+                await _userManager.AddToRoleAsync(user, "Admin");
 
             // Create Admin record
             var admin = new Admin

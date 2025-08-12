@@ -70,12 +70,12 @@ namespace BLL.Service
 
         public async Task<AdvisorDTO> CreateAdvisorAsync(CreateAdvisorDTO createAdvisorDto)
         {
-            // Check if email is unique
+
             var existingUser = await _userManager.FindByEmailAsync(createAdvisorDto.Email);
             if (existingUser != null)
-                throw new InvalidOperationException("Email already exists");
+                throw new InvalidOperationException("البريد الإلكتروني مسجل بالفعل");
 
-            // Create user first
+
             var user = new ApplicationUser
             {
                 UserName = createAdvisorDto.Email,
@@ -87,13 +87,20 @@ namespace BLL.Service
 
             var userResult = await _userManager.CreateAsync(user, createAdvisorDto.Password);
             if (!userResult.Succeeded)
-                throw new InvalidOperationException($"Failed to create user: {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
+                throw new InvalidOperationException("خطأ عند إنشاء المستخدم: " +
+                    string.Join(", ", userResult.Errors.Select(e => e.Description)));
 
-            // Add to Advisor role
-            await _userManager.AddToRoleAsync(user, "Advisor");
+
+            var roleResult = await _userManager.AddToRoleAsync(user, "Advisor");
+            if (!roleResult.Succeeded)
+                throw new InvalidOperationException("فشل في إضافة دور المستشار للمستخدم");
+
+
             FileService fileService = new FileService();
-          var imgUrl= await fileService.UploadFileAsync(createAdvisorDto.Image,"advisorImage");
-            // Create advisor
+            var imgUrl = await fileService.UploadFileAsync(createAdvisorDto.Image, "advisorImage");
+            if (string.IsNullOrEmpty(imgUrl))
+                throw new InvalidOperationException("فشل في رفع صورة المستشار");
+
             var advisor = new Advisor
             {
                 UserId = user.Id,
@@ -109,9 +116,11 @@ namespace BLL.Service
             };
 
             var createdAdvisor = await _advisorRepository.AddAsync(advisor);
+            if (createdAdvisor == null)
+                throw new InvalidOperationException("فشل في حفظ بيانات المستشار");
+
             return _mapper.Map<AdvisorDTO>(createdAdvisor);
         }
-
         public async Task<AdvisorDTO> UpdateAdvisorAsync(int id, UpdateAdvisorDTO updateAdvisorDto)
         {
             var advisor = await _advisorRepository.GetAdvisorByIdWithRelatedDataAsync(id);

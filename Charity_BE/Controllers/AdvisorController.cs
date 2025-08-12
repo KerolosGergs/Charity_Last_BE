@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOS.AdvisorDTOs;
 using Shared.DTOS.Common;
@@ -82,21 +82,33 @@ namespace Charity_BE.Controllers
         // POST: api/advisor
         [HttpPost]
         //[Authorize(Roles = "Admin")]
+        // POST: api/advisor
+        [HttpPost]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<AdvisorDTO>>> CreateAdvisor([FromForm] CreateAdvisorDTO createAdvisorDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<AdvisorDTO>.ErrorResult("Invalid input data", 400, 
-                    ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()));
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return Ok(ApiResponse<AdvisorDTO>.ErrorResult("البيانات المدخلة غير صحيحة", 400, errors));
+            }
 
             try
             {
                 var advisor = await _advisorService.CreateAdvisorAsync(createAdvisorDto);
-                return CreatedAtAction(nameof(GetAdvisorById), new { id = advisor.Id }, 
-                    ApiResponse<AdvisorDTO>.SuccessResult(advisor, "Advisor created successfully"));
+                return Ok(ApiResponse<AdvisorDTO>.SuccessResult(advisor, "تم إنشاء المستشار بنجاح"));
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex) // خطأ متوقع بمكان واضح
             {
-                return StatusCode(500, ApiResponse<AdvisorDTO>.ErrorResult(ex.Message, 500));
+                return Ok(ApiResponse<AdvisorDTO>.ErrorResult(ex.Message, 400));
+            }
+            catch (Exception) // أي خطأ غير متوقع
+            {
+                return Ok(ApiResponse<AdvisorDTO>.ErrorResult("حدث خطأ غير متوقع أثناء إنشاء المستشار", 500));
             }
         }
 

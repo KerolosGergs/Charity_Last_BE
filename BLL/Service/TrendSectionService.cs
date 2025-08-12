@@ -29,6 +29,8 @@ namespace BLL.Service
                return false;
             existingSection.Description = trendSectionDTO.Description ?? existingSection.Description;
             existingSection.Title = trendSectionDTO.Title ?? existingSection.Title;
+            existingSection.ButtonText = trendSectionDTO.ButtonText ?? existingSection.ButtonText;
+            existingSection.ButtonUrl= trendSectionDTO.ButtonUrl ?? existingSection.ButtonUrl;
             if (trendSectionDTO.ImageUrl != null)
             {
                 var fileService = new FileService();
@@ -47,6 +49,8 @@ namespace BLL.Service
             {
                 Title = trendSectionDTO.Title,
                 Description = trendSectionDTO.Description,
+                ButtonText = trendSectionDTO.ButtonText,
+                ButtonUrl = trendSectionDTO.ButtonUrl,
             };
             var updatedSection = await _sectionRepository.UpdateTrendSection(trendSection);
             return updatedSection != null;

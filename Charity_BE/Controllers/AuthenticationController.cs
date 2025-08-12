@@ -104,7 +104,7 @@ namespace Charity_BE.Controllers
 
         // POST: api/authentication/register-advisor
         [HttpPost("register-advisor")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<AuthResponseDTO>>> RegisterAdvisor([FromBody] RegisterAdvisorDTO registerDto)
         {
             try
@@ -126,7 +126,7 @@ namespace Charity_BE.Controllers
                 _logger.LogError(ex, "خطأ في تسجيل المستشار: {Email}", registerDto.Email);
 
                 var errorMessage = !string.IsNullOrEmpty(ex.Message) ? ex.Message : "حدث خطأ في إنشاء حساب المستشار";
-                return BadRequest(ApiResponse<AuthResponseDTO>.ErrorResult(errorMessage, 400));
+                return Ok(ApiResponse<AuthResponseDTO>.ErrorResult(errorMessage, 200));
             }
         }
 
