@@ -251,7 +251,16 @@ namespace DAL.Data
                     ButtonUrl = "/initiatives"
                 }
             );
+            //admin
+            builder.Entity<Admin>(b =>
+            {
+                b.HasOne(a => a.User)
+                 .WithOne(u => u.Admin)
+                 .HasForeignKey<Admin>(a => a.UserId)
+                 .OnDelete(DeleteBehavior.Restrict);
 
+                b.HasIndex(a => a.UserId).IsUnique();
+            });
             // DynamicPage Configuration
 
 

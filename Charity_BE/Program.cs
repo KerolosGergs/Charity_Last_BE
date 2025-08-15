@@ -18,6 +18,7 @@ using BLL.Mapping;
 using Microsoft.Extensions.DependencyInjection;
 using BLL.Services.FileService;
 using DAL.Repositories;
+using System;
 
 namespace Charity_BE
 {
@@ -167,7 +168,9 @@ namespace Charity_BE
                                       );
             });
 
+
             var app = builder.Build();
+         
             app.UseStaticFiles();
 
             app.UseSwagger();
@@ -195,7 +198,24 @@ namespace Charity_BE
                     logger.LogError(ex, "An error occurred during database seeding.");
                 }
             }
+
+
             app.UseCors("AllowFrontend");
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                await db.Database.MigrateAsync(); // make sure schema is ready
+            }
+
+            await DAL.Data.DataSeed.IdentitySeeder.SeedAsync(app.Services);
+
+            // If you also have other application content seeds:
+            using (var scope = app.Services.CreateScope())
+            {
+                var seeder = scope.ServiceProvider.GetRequiredService<DataSeed>();
+                await seeder.IdentityDataSeedAsync();
+                await seeder.DataSeedAsync();
+            }
             app.Run();
         }
     }

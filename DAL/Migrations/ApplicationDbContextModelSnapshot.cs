@@ -1874,7 +1874,7 @@ namespace DAL.Migrations
                     b.HasOne("DAL.Data.Models.IdentityModels.ApplicationUser", "User")
                         .WithOne("Admin")
                         .HasForeignKey("DAL.Data.Models.IdentityModels.Admin", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");

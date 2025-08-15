@@ -1,14 +1,14 @@
 [
-    {
-        "FullName": "Admin",
-        "Email": "Admin@gmail.com",
-        "UserName": "admin",
-        "Password": "Admin@123",
-        "Address": "Address",
-        "Role": "Admin",
-        "UserId": "090d8402-d313-4c14-9016-7c60b49beae6",
-        "PhoneNumber": "01011845887",
-        "IsActive": true,
-        "CreatedAt": "2025-07-01T00:00:00Z"
-    }
+  {
+    "FullName": "Admin",
+    "Email": "Admin@gmail.com",
+    "UserName": "admin",
+    "Password": "Admin@123",
+    "Address": "Address",
+    "Role": "Admin",
+    "UserId": "090d8402-d313-4c14-9016-7c60b49beae6",
+    "PhoneNumber": "01011845887",
+    "IsActive": true,
+    "CreatedAt": "2025-07-01T00:00:00Z"
+  }
 ]

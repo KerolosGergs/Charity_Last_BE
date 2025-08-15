@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250812100019_lastone")]
-    partial class lastone
+    [Migration("20250814211707_seeder")]
+    partial class seeder
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1877,7 +1877,7 @@ namespace DAL.Migrations
                     b.HasOne("DAL.Data.Models.IdentityModels.ApplicationUser", "User")
                         .WithOne("Admin")
                         .HasForeignKey("DAL.Data.Models.IdentityModels.Admin", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
